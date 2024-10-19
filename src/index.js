@@ -19,6 +19,7 @@ import HTMLLesson from "./components/lesson-02-basic-html/HTMLLesson";
 import HTMLForms from "./components/lesson-03-html-forms-and-tables/HTMLForms";
 import CSSLayout from "./components/lesson-07-css-layout/CSSLayout";
 import CSSRWD from "./components/lesson-08-css-rwd/CSSRWD";
+import CSSFlexbox from "./components/lesson-10-css-flexbox/CSSFlexbox";
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
   {
     path: "/lesson-08-css-rwd",
     element: <CSSRWD />,
+  },
+  {
+    path: "/lesson-10-css-flexbox",
+    element: <CSSFlexbox />,
   },
 ]);
 const root = ReactDOM.createRoot(document.getElementById("root"));

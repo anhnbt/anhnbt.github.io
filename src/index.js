@@ -4,7 +4,6 @@ import reportWebVitals from "./reportWebVitals";
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import "./index.css";
 import 'aos/dist/aos.css';
-import AboutMe from "./AboutMe";
 import {One} from "./components/lesson-01-basic-ux-ui/One";
 import {Two} from "./components/lesson-01-basic-ux-ui/Two";
 import {Three} from "./components/lesson-01-basic-ux-ui/Three";
@@ -20,11 +19,12 @@ import HTMLForms from "./components/lesson-03-html-forms-and-tables/HTMLForms";
 import CSSLayout from "./components/lesson-07-css-layout/CSSLayout";
 import CSSRWD from "./components/lesson-08-css-rwd/CSSRWD";
 import CSSFlexbox from "./components/lesson-10-css-flexbox/CSSFlexbox";
+import ProfileSteps from "./components/class-settings/ProfileSteps";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AboutMe />,
+    element: <ProfileSteps />,
   },
   {
     path: "/lesson-01-basic-ux-ui/one",

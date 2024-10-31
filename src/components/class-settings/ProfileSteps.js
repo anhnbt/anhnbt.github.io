@@ -57,8 +57,7 @@ const ProfileSteps = () => {
           <div class="info">
             <h1>Nguyễn Bá Tuấn Anh</h1>
             <p>
-              <FontAwesomeIcon className="icon" icon={faCakeCandles} /> Ngày
-              sinh: 16/11/1995
+              <FontAwesomeIcon className="icon" icon={faCakeCandles} /> 29 tuổi (1995)
             </p>
             <p>
               <FontAwesomeIcon className="icon" icon={faEnvelope} /> Email:{" "}
@@ -77,6 +76,8 @@ const ProfileSteps = () => {
               Instructor - Giảng viên lý thuyết
             </p>
             <div class="skills">
+              <h3>Kinh nghiệm làm việc</h3>
+              <p>8 năm trong lĩnh vực công nghệ, bao gồm 3 năm làm mentor dự án tại CodeGym, hỗ trợ học viên áp dụng kỹ năng vào các dự án thực tế.</p>
               <h3>Môn giảng dạy:</h3>
               <p>HTML, CSS, JavaScript, ReactJS, SQL, Java, Spring Boot</p>
             </div>
@@ -455,7 +456,7 @@ const ProfileSteps = () => {
 
   return (
     <div className="app">
-      <div className="w-2/3  mx-auto p-6 mt-5 bg-white shadow-lg rounded-lg">
+      <div className="w-10/12  mx-auto p-6 mt-5 bg-white shadow-lg rounded-lg">
         <Steps current={currentStep} className="mb-6">
           {steps.map((step, index) => (
             <Step

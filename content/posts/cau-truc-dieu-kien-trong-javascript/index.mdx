@@ -1,0 +1,208 @@
+---
+title: Cấu trúc điều kiện trong JavaScript
+description: Tìm hiểu câu lệnh điều kiện trong JavaScript
+date: 2025-03-20
+slug: cau-truc-dieu-kien-trong-javascript
+tags:
+  - Javascript
+---
+
+## Giới thiệu
+
+Cấu trúc điều kiện giúp kiểm soát luồng thực thi của chương trình dựa trên các điều kiện cụ thể. JavaScript cung cấp các câu lệnh điều kiện phổ biến như `if`, `if-else`, `if-else if`, `switch-case` để xử lý nhiều tình huống khác nhau.
+
+## Mục tiêu bài học
+
+Sau khi đọc bài này, bạn sẽ:
+
+- Hiểu được cách hoạt động của câu lệnh điều kiện trong JavaScript
+- Biết cách sử dụng if, if-else, if-else if, switch-case
+- Biết cách sử dụng từ khóa break, default trong switch-case
+- So sánh được sự khác biệt giữa if-else if và switch-case
+- Áp dụng vào các tình huống thực tế trong lập trình
+
+## Câu lệnh `if`
+
+Câu lệnh `if` kiểm tra một điều kiện. Nếu điều kiện đúng (`true`), khối mã bên trong sẽ được thực thi.
+
+### Cú pháp:
+
+```js
+if (điều_kiện) {
+  // Khối mã thực thi nếu điều kiện đúng
+}
+```
+
+### Ví dụ:
+
+Giả sử bạn đang xây dựng một hệ thống kiểm tra độ tuổi để xem một người có đủ điều kiện để lái xe hay không.
+
+```js
+let age = 20;
+
+if (age >= 18) {
+  console.log('Bạn đủ tuổi để lái xe!');
+}
+```
+
+Nếu `age` lớn hơn hoặc bằng `18`, chương trình sẽ hiển thị `"Bạn đủ tuổi để lái xe!"`.
+
+## Câu lệnh `if-else`
+
+Câu lệnh `if-else` cho phép chương trình thực thi một khối mã nếu điều kiện đúng và một khối khác nếu điều kiện sai.
+
+### Cú pháp:
+
+```js
+if (điều_kiện) {
+  // Thực thi nếu điều kiện đúng
+} else {
+  // Thực thi nếu điều kiện sai
+}
+```
+
+### Ví dụ:
+
+Kiểm tra giờ trong ngày để hiển thị lời chào phù hợp.
+
+```js
+let hour = 20;
+
+if (hour < 18) {
+  console.log('Chào buổi ngày!');
+} else {
+  console.log('Chào buổi tối!');
+}
+```
+
+Nếu `hour < 18`, chương trình hiển thị `"Chào buổi ngày!"`, ngược lại hiển thị `"Chào buổi tối!"`.
+
+## Câu lệnh `if-else if`
+
+Câu lệnh `if-else if` giúp kiểm tra nhiều điều kiện khác nhau.
+
+### Cú pháp:
+
+```js
+if (điều_kiện_1) {
+  // Thực thi nếu điều kiện_1 đúng
+} else if (điều_kiện_2) {
+  // Thực thi nếu điều kiện_1 sai và điều kiện_2 đúng
+} else {
+  // Thực thi nếu tất cả các điều kiện đều sai
+}
+```
+
+### Ví dụ:
+
+Hiển thị lời chào dựa vào thời gian trong ngày.
+
+```js
+let hour = 12;
+
+if (hour < 12) {
+  console.log('Chào buổi sáng!');
+} else if (hour < 18) {
+  console.log('Chào buổi chiều!');
+} else {
+  console.log('Chào buổi tối!');
+}
+```
+
+Nếu `hour = 12`, chương trình sẽ hiển thị `"Chào buổi chiều!"`.
+
+## Câu lệnh `switch-case`
+
+Câu lệnh `switch` kiểm tra một giá trị cụ thể và thực thi khối mã tương ứng. `switch-case` sẽ giúp mã dễ đọc hơn so với `if-else if`.
+
+### Cú pháp:
+
+```js
+switch (biểu_thức) {
+  case giá_trị_1:
+    // Khối lệnh nếu biểu thức == giá_trị_1
+    break;
+  case giá_trị_2:
+    // Khối lệnh nếu biểu thức == giá_trị_2
+    break;
+  default:
+  // Khối lệnh mặc định nếu không có case nào khớp
+}
+```
+
+### Ví dụ:
+
+Xác định tên ngày trong tuần dựa vào số thứ tự.
+
+```js
+let day = new Date().getDay();
+let dayName;
+
+switch (day) {
+  case 0:
+    dayName = 'Chủ Nhật';
+    break;
+  case 1:
+    dayName = 'Thứ Hai';
+    break;
+  case 2:
+    dayName = 'Thứ Ba';
+    break;
+  default:
+    dayName = 'Một ngày khác';
+}
+
+console.log(dayName);
+```
+
+Nếu `day = 1`, chương trình sẽ hiển thị `"Thứ Hai"`.
+
+## So sánh `if-else if` và `switch-case`
+
+| Đặc điểm           | `if-else if`                          | `switch-case`                  |
+| ------------------ | ------------------------------------- | ------------------------------ |
+| Kiểm tra điều kiện | Biểu thức logic (`>`, `<`, `==`, ...) | So sánh giá trị cụ thể (`===`) |
+| Độ linh hoạt       | Cao                                   | Thấp hơn                       |
+| Dễ đọc hơn khi     | Có nhiều điều kiện phức tạp           | Có nhiều giá trị cụ thể        |
+
+### Khi nào dùng `if-else if`?
+
+Khi điều kiện phức tạp và liên quan đến phép so sánh (`>`, `<`, `>=`, `<=`, `…`).
+
+### Khi nào dùng `switch-case`?
+
+Khi cần kiểm tra một biến với nhiều giá trị cụ thể.
+
+## Từ khóa `break` và `default`
+
+- `break`: Dùng để kết thúc `switch-case`, ngăn chặn việc thực thi các case tiếp theo.
+- `default`: Được thực thi khi không có case nào khớp với giá trị của biểu thức.
+
+### Ví dụ
+
+```js
+let fruit = 'apple';
+
+switch (fruit) {
+  case 'banana':
+    console.log('Bạn chọn chuối!');
+    break;
+  case 'apple':
+    console.log('Bạn chọn táo!');
+    break;
+  default:
+    console.log('Loại trái cây không xác định!');
+}
+```
+
+Nếu `fruit = "apple"`, chương trình hiển thị `"Bạn chọn táo!"`.
+
+## Kết luận
+
+Sau bài viết này, bạn đã học về:
+
+- Cấu trúc điều kiện `if`, `if-else`, `if-else if`, `switch-case`
+- So sánh `if-else if` và `switch-case`
+- Cách sử dụng từ khóa `break`, `default`
+
+Các kiến thức này rất quan trọng để kiểm soát luồng thực thi của chương trình trong lập trình thực tế!

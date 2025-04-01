@@ -1,0 +1,243 @@
+---
+title: Hàm trong JavaScript
+description: Nắm vững hàm JavaScript từ cú pháp đến các khái niệm nâng cao như closure và đệ quy, giúp bạn viết code hiệu quả, dễ bảo trì và tái sử dụng như một pro!
+date: 2025-04-01
+slug: ham-trong-javascript
+tags:
+  - Javascript
+---
+
+Xin chào các bạn! Hãy cùng nhau khám phá một trong những kiến thức nền tảng quan trọng nhất của JavaScript: **hàm**. Nếu bạn mới bắt đầu học lập trình, đừng lo – mình sẽ giải thích mọi thứ nhẹ nhàng như cách pha một ly trà sữa trân châu vậy. Chúng ta không chỉ học cú pháp mà còn tìm hiểu cách tư duy để viết code dễ hiểu, dễ sửa!
+
+## Mục Tiêu
+
+Bài viết này dành cho các bạn mới học JavaScript, với những điều cần biết về hàm như:
+
+- Hiểu hàm là gì và tại sao nó quan trọng.
+- Nắm cách khai báo và gọi hàm.
+- Dùng giá trị trả về (`return`) thật “chuẩn”.
+- Làm quen với các kiểu hàm: nặc danh, mũi tên, đệ quy, IIFE.
+- Phân biệt truyền tham trị và tham chiếu.
+- Khám phá đối tượng `arguments`, tham số mặc định, rest parameters.
+- Hiểu phạm vi (scope) và bao đóng (closure).
+- Áp dụng quy tắc viết code đẹp (coding conventions).
+- Tạo nền tảng để làm bài tập thực hành.
+
+## Nội Dung
+
+### Hàm là gì và tại sao chúng ta cần chúng?
+
+Hãy tưởng tượng bạn mở một quán trà sữa. Nếu mỗi lần khách gọi món, bạn phải pha trà, nấu trân châu, trộn sữa từ đầu – chắc mệt lắm! Thay vào đó, bạn làm sẵn các **công thức nhỏ**: pha trà, thêm trân châu, trộn topping. Khi cần, bạn chỉ gọi công thức là xong.
+
+Trong JavaScript, **hàm cũng giống vậy** – những khối mã độc lập, được thiết kế để thực hiện một nhiệm vụ cụ thể. Thay vì lặp đi lặp lại cùng một đoạn mã, chúng ta đóng gói nó vào một hàm và tái sử dụng nó bất cứ khi nào cần. Điều này không chỉ giúp mã nguồn trở nên ngắn gọn và dễ đọc hơn mà còn giúp cho việc bảo trì và quản lý trở nên dễ dàng hơn. Khi có sự thay đổi, bạn chỉ cần sửa đổi ở một nơi duy nhất.
+
+Ví dụ, thay vì viết `25000 + 10000` ở 10 chỗ để tính tiền, bạn gói nó vào hàm:
+
+```javascript
+function tinhTien(traSua, topping) {
+  return traSua + topping;
+}
+console.log(tinhTien(25000, 10000)); // 35000
+```
+
+Chỉ sửa một chỗ nếu giá đổi – tiết kiệm thời gian, đúng không?
+
+### Khai báo và Gọi hàm
+
+Để dùng hàm, bạn cần **khai báo** nó trước. Cú pháp cơ bản như sau:
+
+```javascript
+function tenHam(thamSo1, thamSo2, ...) {
+  // Các câu lệnh thực hiện công việc
+  return giaTriTraVe; // (tùy chọn)
+}
+```
+
+- `function`: Từ khóa bắt buộc để khai báo một hàm.
+- `tenHam`: Tên của hàm, giúp chúng ta gọi và sử dụng nó. Tên hàm nên **mô tả rõ ràng chức năng** của nó.
+- `(thamSo1, thamSo2, ...)`: Danh sách các **tham số** (parameters) mà hàm có thể nhận vào khi được gọi. Các tham số hoạt động như các biến cục bộ bên trong hàm.
+- `{ // Các câu lệnh thực hiện công việc }`: Phần thân của hàm, chứa các **câu lệnh JavaScript** được thực thi khi hàm được gọi.
+- `return giaTriTraVe;`: Lệnh `return` dùng để trả về một **giá trị** từ hàm cho nơi gọi hàm. Hàm sẽ **dừng thực thi** ngay khi gặp lệnh `return`. Một hàm có thể có hoặc không có giá trị trả về.
+
+Gọi hàm thì đơn giản:
+
+Để gọi một hàm, chúng ta sử dụng tên hàm theo sau là cặp dấu ngoặc đơn (). Nếu hàm có tham số, chúng ta truyền các đối số (arguments) tương ứng vào trong dấu ngoặc đơn.
+
+```javascript
+let ketQua = tenHam(doiSo1, doiSo2, ...);
+console.log(ketQua);
+```
+
+**Lưu ý quan trọng**: Bỏ qua cặp ngoặc đơn khi gọi hàm sẽ trả về tham chiếu đến hàm chứ không phải thực thi hàm và trả về giá trị
+
+### Các loại hàm khác nhau
+
+JavaScript cung cấp nhiều cách linh hoạt để định nghĩa hàm, giống như nhiều kiểu pha trà sữa:
+
+1. **Hàm nặc danh (Anonymous Functions)**: Là hàm không có tên, thường được gán cho một biến hoặc được sử dụng làm đối số cho một hàm khác:
+
+   ```javascript
+   let binhPhuong = function (x) {
+     return x * x;
+   };
+   console.log(binhPhuong(5)); // 25
+   ```
+
+2. **Hàm biểu thức (Function Expressions)**: Tương tự hàm nặc danh, hàm được định nghĩa như một biểu thức và có thể có hoặc không có tên:
+
+   ```javascript
+   const factorial = function fac(n) {
+     return n < 2 ? 1 : n * fac(n - 1);
+   };
+
+   console.log(factorial(3)); // 6
+   ```
+
+3. **Hàm mũi tên (Arrow Functions)**: Cú pháp ngắn gọn hơn so với function expression và không có `this`, `arguments`, `super`, hoặc `new.target` riêng. Thường được sử dụng trong các functional patterns:
+
+   ```javascript
+   const nhanDoi = (x) => x * 2;
+   console.log(nhanDoi(10)); // 20
+   ```
+
+4. **Hàm đệ quy (Recursive Functions)**: Là hàm tự gọi lại chính nó để giải quyết một bài toán bằng cách chia nhỏ nó thành các bài toán con tương tự. Cần có điều kiện dừng để tránh lặp vô hạn. Ví dụ kinh điển là tính giai thừa:
+
+   ```javascript
+   function factorial(n) {
+     if (n === 0 || n === 1) {
+       return 1;
+     } else {
+       return n * factorial(n - 1);
+     }
+   }
+   ```
+
+5. **Hàm được gọi ngay lập tức (Immediately Invoked Function Expressions - IIFE)**: Là một function expression được gọi ngay sau khi được định nghĩa. Thường được sử dụng để tạo ra một scope riêng biệt, giúp tránh xung đột biến:
+   ```javascript
+   (function () {
+     console.log('Quán trà sữa khai trương!');
+   })();
+   ```
+
+**Điểm hay**: Hàm khai báo bình thường (`function tenHam`) có **hoisting** – gọi trước khi viết cũng được. Hàm nặc danh hay mũi tên thì không nhé!
+
+### Đối số của hàm
+
+JavaScript không ép bạn đưa đúng số đối số. Đưa thiếu hay thừa cũng chạy:
+
+```javascript
+function chaoKhach(ten) {
+  return 'Chào ' + ten + ', trà sữa đây!';
+}
+console.log(chaoKhach('Nam')); // "Chào Nam, trà sữa đây!"
+console.log(chaoKhach()); // "Chào undefined, trà sữa đây!"
+```
+
+- **Đối tượng đặc biệt `arguments`**: Bên trong hàm, bạn có thể truy cập tất cả các đối số được truyền vào thông qua đối tượng đặc biệt `arguments`. `arguments` hoạt động như một mảng (array-like object) chứa tất cả các đối số theo thứ tự truyền vào. Bạn có thể truy cập từng đối số bằng chỉ số (ví dụ: arguments) và biết tổng số đối số thông qua arguments.length:
+
+  ```javascript
+  function xemDonHang() {
+    console.log(arguments[0]);
+  }
+  xemDonHang(25000, 'trân châu'); // 25000
+  ```
+
+Ngoài ra, JavaScript còn cung cấp các cú pháp tham số mạnh mẽ hơn:
+
+- **Default parameters (Tham số mặc định)**: Cho phép bạn chỉ định giá trị mặc định cho các tham số nếu không có giá trị nào được truyền vào khi gọi hàm:
+
+  ```javascript
+  function chaoKhach(ten = 'quý khách') {
+    return 'Chào ' + ten + ', trà sữa đây!';
+  }
+  console.log(chaoKhach()); // "Chào quý khách, trà sữa đây!"
+  ```
+
+- **Rest parameters (Tham số còn lại) (`...`)**: Cho phép thu thập tất cả các đối số còn lại (sau các tham số đã đặt tên) vào một mảng. Cú pháp là ba dấu chấm `...` trước tên tham số cuối cùng:
+
+  ```javascript
+  function tinhTong(...gia) {
+    return gia.reduce((a, b) => a + b);
+  }
+  console.log(tinhTong(25000, 10000, 5000)); // 40000
+  ```
+
+### Truyền tham trị và tham chiếu
+
+- **Tham trị (pass by value)**: Trong JavaScript, khi bạn truyền các giá trị nguyên thủy (primitive values) như số, chuỗi, boolean vào hàm, chúng được truyền theo tham trị (pass by value). Điều này có nghĩa là một bản sao của giá trị được tạo ra và truyền vào hàm. Bất kỳ thay đổi nào đối với tham số bên trong hàm sẽ không ảnh hưởng đến biến gốc bên ngoài hàm:
+
+  ```javascript
+  function tangGia(gia) {
+    gia += 5000;
+    return gia;
+  }
+  let giaTraSua = 25000;
+  console.log(tangGia(giaTraSua)); // 30000
+  console.log(giaTraSua); // 25000 – Gốc không đổi!
+  ```
+
+- **Tham chiếu (pass by reference)**: Tuy nhiên, khi bạn truyền các đối tượng (bao gồm cả mảng) vào hàm, chúng được truyền theo tham chiếu (pass by reference). Lúc này, một bản sao của tham chiếu (con trỏ) đến đối tượng được truyền vào hàm. Do đó, nếu hàm thay đổi thuộc tính của đối tượng, sự thay đổi này sẽ ảnh hưởng đến đối tượng gốc bên ngoài hàm. Lưu ý: Nếu bạn gán một đối tượng mới cho tham số bên trong hàm, nó sẽ chỉ thay đổi tham chiếu cục bộ và không làm thay đổi biến gốc:
+  ```javascript
+  function themTopping(danhSach) {
+    danhSach.push('trân châu');
+  }
+  let topping = ['thạch'];
+  themTopping(topping);
+  console.log(topping); // ["thạch", "trân châu"]
+  ```
+
+### Phạm vi (Scope) và Bao đóng (Closure)
+
+**Phạm vi (Scope)** xác định nơi mà các biến có thể được truy cập trong mã của bạn. Các biến được khai báo bên trong một hàm là biến cục bộ (local variables) và chỉ có thể được truy cập bên trong hàm đó. Các biến được khai báo bên ngoài bất kỳ hàm nào là biến toàn cục (global variables) và có thể được truy cập từ bất kỳ đâu
+
+```javascript
+function phaTraSua() {
+  let tra = 'trà đen';
+  return tra;
+}
+console.log(phaTraSua()); // "trà đen"
+console.log(tra); // Lỗi!
+```
+
+**Bao đóng (Closure)**: là một khái niệm mạnh mẽ trong JavaScript. Một closure xảy ra khi một hàm bên trong (inner function) cố gắng truy cập các biến của hàm bên ngoài (outer function) sau khi hàm bên ngoài đã hoàn thành việc thực thi. Hàm bên trong "nhớ" và giữ quyền truy cập vào môi trường (lexical environment) của hàm bên ngoài tại thời điểm nó được tạo ra. Điều này cho phép tạo ra các hàm có trạng thái riêng tư:
+
+```javascript
+function demTraSua() {
+  let soLy = 0;
+  return function () {
+    soLy += 1;
+    return soLy;
+  };
+}
+const demCuaToi = demTraSua();
+console.log(demCuaToi()); // 1
+console.log(demCuaToi()); // 2
+```
+
+Giống sổ tay đếm ly trà sữa mà chỉ bạn dùng được!
+
+### Coding Conventions cho Hàm
+
+Để đảm bảo mã của bạn dễ đọc, dễ hiểu và nhất quán, hãy tuân theo các quy tắc coding convention sau khi làm việc với hàm.
+
+- **Đặt tên rõ ràng và có ý nghĩa** cho hàm, sử dụng camelCase hoặc snake_case. Tên hàm thường bắt đầu bằng động từ.
+- **Giữ hàm ngắn gọn**: Số dòng trong hàm không nên vượt quá 30 dòng.
+- **Hạn chế số lượng tham số**: Tối đa 5 tham số, tốt nhất là ≤3.
+- **Hạn chế sử dụng comment để giải thích code**: Ưu tiên viết code dễ đọc và rõ ràng. Chỉ sử dụng comment khi cần thiết để ghi chú thông tin bổ sung cho đoạn mã phức tạp hoặc tài liệu mô tả class, thư viện.
+- **Xuống hàng** sau dấu phẩy trong danh sách tham số dài, trước các toán tử, và khi có nhiều cấp lồng nhau để tăng tính dễ đọc.
+
+### Luyện tập với Hàm
+
+Học mà không làm thì như ngắm trà sữa mà không uống. Hãy thử sức với các bài tập như:
+
+1. Hàm tính tiền trà sữa (giá + topping).
+2. Hàm đổi độ C sang độ F: `C * 9/5 + 32`.
+3. Hàm kiểm tra số nguyên tố.
+4. Chuyển đổi giữa feet và meters
+5. Xây dựng một ứng dụng quản lý sản phẩm đơn giản sử dụng hàm
+
+## Kết luận
+
+Hàm là nền tảng cốt lõi trong lập trình JavaScript. Việc nắm vững cách khai báo, gọi, sử dụng tham số và giá trị trả về của hàm, cũng như hiểu rõ các khái niệm nâng cao như closure và đệ quy, sẽ giúp bạn viết mã sạch sẽ, hiệu quả và dễ bảo trì hơn. Hãy nhớ rằng, việc luyện tập thường xuyên với các bài thực hành và bài tập sẽ giúp bạn trở nên thành thạo hơn trong việc sử dụng hàm để giải quyết các vấn đề lập trình phức tạp.
+
+Đừng chỉ đọc – hãy làm ngay, sai thì sửa, đó mới là cách học thật sự. Chúc bạn sớm “pha” được những ly code ngon lành với JavaScript!

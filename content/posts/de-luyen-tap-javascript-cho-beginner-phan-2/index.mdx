@@ -1,7 +1,7 @@
 ---
 title: Đề Luyện Tập JavaScript Cho Beginner (Phần 2)
 description: Tài liệu luyện tập JavaScript dễ hiểu cho người mới học lập trình với các bài tập thực hành về cấu trúc điều kiện if, if-else, if-else if và switch-case.
-date: 2025-06-20
+date: 2025-06-25
 slug: de-luyen-tap-javascript-cho-beginner-phan-2
 tags:
   - Javascript
@@ -9,7 +9,9 @@ tags:
 
 ## Tổng Quan
 
-Phần thứ hai trong bộ đề luyện tập JavaScript dành cho người mới bắt đầu học lập trình. Trong phần này, chúng ta sẽ tập trung vào cấu trúc điều kiện: if, if-else, if-else if và switch-case. Thông qua các bài tập thực hành, bạn sẽ hiểu cách điều khiển luồng chương trình dựa trên các điều kiện khác nhau.
+Phần thứ hai trong bộ đề luyện tập JavaScript dành cho người mới bắt đầu học lập trình. Trong phần này, chúng ta sẽ tập trung vào cấu trúc điều kiện: `if`, `if-else`, `if-else if` và `switch-case`. 
+
+Giống như trong cuộc sống hàng ngày, bạn thường phải đưa ra quyết định dựa trên hoàn cảnh (ví dụ: "Nếu trời mưa, tôi sẽ mang ô"). Trong lập trình, cấu trúc điều kiện giúp máy tính làm điều tương tự. Thông qua các bài tập thực hành, bạn sẽ hiểu cách điều khiển luồng chương trình dựa trên các điều kiện khác nhau.
 
 > **Luyện tập là cách tốt nhất để thành thạo JavaScript!**  
 > Hãy đảm bảo thực hành tất cả các bài tập dưới đây.
@@ -20,13 +22,13 @@ Phần thứ hai trong bộ đề luyện tập JavaScript dành cho người m�
 
 ### Kiến thức cần nhớ
 
-- **Câu lệnh `if` đầy đủ và thiếu**: 
-  - **If đầy đủ**: Có cả phần `if` và `else`. Cú pháp: `if (điều_kiện) { khối_lệnh_1 } else { khối_lệnh_2 }`
-  - **If thiếu**: Chỉ có phần `if`, không có `else`. Cú pháp: `if (điều_kiện) { khối_lệnh }`
+- **Câu lệnh `if`**: Dùng để thực thi một khối lệnh nếu một điều kiện là đúng.
+  - **If thiếu (Simple `if`)**: Chỉ có phần `if`, không có `else`. Cú pháp: `if (điều_kiện) { khối_lệnh }`
+  - **If đầy đủ (`if-else`)**: Có cả phần `if` và `else`. Cú pháp: `if (điều_kiện) { khối_lệnh_1 } else { khối_lệnh_2 }`
 
-- **Câu lệnh `if` bậc thang**: Sử dụng `else if` để kiểm tra nhiều điều kiện theo thứ tự. Cú pháp: `if (điều_kiện_1) { khối_lệnh_1 } else if (điều_kiện_2) { khối_lệnh_2 } else { khối_lệnh_3 }`
+- **Câu lệnh `if` bậc thang (`if-else if`)**: Sử dụng `else if` để kiểm tra nhiều điều kiện theo thứ tự. Rất hữu ích khi bạn có nhiều hơn hai khả năng. Cú pháp: `if (điều_kiện_1) { khối_lệnh_1 } else if (điều_kiện_2) { khối_lệnh_2 } else { khối_lệnh_3 }`
 
-- **Câu lệnh `if` lồng nhau**: Đặt một câu lệnh `if` bên trong một câu lệnh `if` khác. Cú pháp:
+- **Câu lệnh `if` lồng nhau**: Đặt một câu lệnh `if` bên trong một câu lệnh `if` khác. Hữu ích cho các kịch bản phức tạp, nhưng hãy cẩn thận để không làm code quá khó đọc. Cú pháp:
   ```js
   if (điều_kiện_1) {
     if (điều_kiện_2) {
@@ -35,7 +37,7 @@ Phần thứ hai trong bộ đề luyện tập JavaScript dành cho người m�
   }
   ```
 
-- **Câu lệnh `switch-case`**: Kiểm tra một biểu thức với nhiều giá trị khác nhau. Cú pháp: 
+- **Câu lệnh `switch-case`**: So sánh một biểu thức với nhiều giá trị (case) khác nhau. Đây là một giải pháp thay thế gọn gàng cho `if-else if` khi bạn chỉ kiểm tra một biến duy nhất. Cú pháp: 
   ```js
   switch (biểu_thức) {
     case giá_trị_1: khối_lệnh_1; break;
@@ -44,7 +46,9 @@ Phần thứ hai trong bộ đề luyện tập JavaScript dành cho người m�
   }
   ```
 
-- **Từ khóa `break`**: Dùng trong `switch-case` để thoát khỏi cấu trúc sau khi thực thi một case.
+> **Lưu ý quan trọng**: Trong JavaScript, bạn nên ưu tiên sử dụng toán tử so sánh nghiêm ngặt `===` thay vì `==`. Toán tử `===` kiểm tra cả giá trị và kiểu dữ liệu, giúp tránh các lỗi không mong muốn. Chúng ta sẽ tìm hiểu kỹ hơn ở phần sau.
+
+- **Từ khóa `break`**: Dùng trong `switch-case` để thoát khỏi cấu trúc sau khi một case được thực thi. Nếu không có `break`, code sẽ tiếp tục chạy xuống các case tiếp theo ("fall-through").
 - **Từ khóa `default`**: Case mặc định trong `switch-case`, được thực thi khi không có case nào khớp.
 
 ### Bài tập cốt lõi
@@ -113,38 +117,30 @@ if (hour < 12) {
 
 #### 4. Sử dụng câu lệnh `if` lồng nhau
 
-- Khai báo biến `userLoggedIn` với giá trị boolean (true hoặc false)
-- Khai báo biến `userHasPermission` với giá trị boolean 
-- Khai báo biến `timeOfDay` với giá trị "morning", "afternoon" hoặc "evening"
+- Khai báo biến `isLoggedIn` với giá trị boolean (`true` hoặc `false`)
+- Khai báo biến `userRole` với giá trị là `"admin"` hoặc `"user"`
 - Sử dụng câu lệnh `if` lồng nhau để:
-  - Kiểm tra xem người dùng đã đăng nhập chưa
-  - Nếu đã đăng nhập, kiểm tra xem họ có quyền truy cập không
-  - Nếu có quyền truy cập, hiển thị lời chào phù hợp với thời gian trong ngày
+  - Kiểm tra xem người dùng đã đăng nhập chưa (`isLoggedIn`).
+  - Nếu đã đăng nhập, kiểm tra vai trò của họ (`userRole`).
+  - Hiển thị lời chào phù hợp: "Chào mừng admin!" hoặc "Chào mừng user!".
+  - Nếu chưa đăng nhập, hiển thị "Vui lòng đăng nhập để tiếp tục."
 
 <details>
 <summary>**Xem lời giải**</summary>
 
 ```javascript
-var userLoggedIn = true;
-var userHasPermission = true;
-var timeOfDay = "afternoon";
-var greeting;
+var isLoggedIn = true;
+var userRole = "admin";
 
-if (userLoggedIn) {
-  if (userHasPermission) {
-    if (timeOfDay === "morning") {
-      greeting = "Chào buổi sáng, bạn có quyền truy cập hệ thống";
-    } else if (timeOfDay === "afternoon") {
-      greeting = "Chào buổi chiều, bạn có quyền truy cập hệ thống";
-    } else {
-      greeting = "Chào buổi tối, bạn có quyền truy cập hệ thống";
-    }
-    console.log(greeting);
+if (isLoggedIn) {
+  console.log("Đã đăng nhập thành công.");
+  if (userRole === "admin") {
+    console.log("Chào mừng admin!");
   } else {
-    console.log("Bạn không có quyền truy cập");
+    console.log("Chào mừng user!");
   }
 } else {
-  console.log("Vui lòng đăng nhập");
+  console.log("Vui lòng đăng nhập để tiếp tục.");
 }
 ```
 </details>
@@ -152,8 +148,8 @@ if (userLoggedIn) {
 #### 5. Sử dụng câu lệnh `switch-case`
 
 - Khai báo biến `dayNumber` với giá trị từ 0-6 (0: Chủ nhật, 1-6: Thứ 2 đến Thứ 7)
-- Sử dụng câu lệnh `switch-case` để hiển thị tên ngày trong tuần
-- Đảm bảo sử dụng từ khóa `break` sau mỗi case và có case `default`
+- Sử dụng câu lệnh `switch-case` để hiển thị tên ngày trong tuần.
+- **Lưu ý**: Hãy chú ý vai trò của `break`. Nếu không có nó, chương trình sẽ thực thi cả những `case` phía sau `case` đúng.
 
 <details>
 <summary>**Xem lời giải**</summary>
@@ -294,8 +290,8 @@ console.log("Tháng", month, "thuộc mùa", season);
    - `!=` và `!==` là phủ định của các toán tử trên
 
 2. **Giá trị truthy và falsy:**
-   - Falsy: `false`, `0`, `''` (chuỗi rỗng), `null`, `undefined`, `NaN`
-   - Truthy: mọi giá trị khác falsy
+   - **Falsy**: những giá trị được coi là `false` trong ngữ cảnh logic. Gồm: `false`, `0`, `-0`, `0n` (BigInt), `''` (chuỗi rỗng), `null`, `undefined`, `NaN`.
+   - **Truthy**: mọi giá trị khác falsy đều là `true` trong ngữ cảnh logic (ví dụ: `'hello'`, `123`, `true`, `[]`, `{}`)
 
 3. **Sử dụng ngoặc nhọn {}:**
    - Luôn sử dụng ngoặc nhọn, ngay cả với khối lệnh đơn
@@ -337,7 +333,7 @@ switch (paymentMethod) {
 
 ### Mẹo: Sử dụng toán tử ba ngôi
 
-Toán tử ba ngôi (`condition ? exprIfTrue : exprIfFalse`) là cách rút gọn của `if-else` khi bạn cần gán giá trị dựa trên một điều kiện.
+Toán tử ba ngôi (`condition ? exprIfTrue : exprIfFalse`) là cách rút gọn của `if-else` khi bạn cần gán giá trị dựa trên một điều kiện. Nó giúp code ngắn gọn hơn, nhưng hãy sử dụng một cách khôn ngoan.
 
 ```javascript
 // Thay vì viết:
@@ -353,7 +349,9 @@ var message = age >= 18 ? "Đủ tuổi" : "Chưa đủ tuổi";
 console.log(message);
 ```
 
-Toán tử ba ngôi giúp code ngắn gọn hơn, đặc biệt khi cần gán giá trị nhanh hoặc trả về kết quả từ điều kiện.
+**Khi nào nên dùng?**
+- **Nên dùng**: Cho các điều kiện đơn giản và phép gán giá trị.
+- **Nên tránh**: Khi logic phức tạp. Một câu lệnh `if-else` đầy đủ sẽ dễ đọc và dễ bảo trì hơn.
 
 ### Gợi ý mở rộng
 
@@ -366,35 +364,37 @@ Toán tử ba ngôi giúp code ngắn gọn hơn, đặc biệt khi cần gán g
 ### Bài tập mở rộng (Tự thực hành)
 
 1. **Tính hóa đơn điện thoại**
-   - Tạo biến `minutes` (số phút gọi) và `messages` (số tin nhắn)
-   - Tính tiền điện thoại theo quy tắc: 0.1$/phút và 0.05$/tin nhắn
-   - Nếu tổng tiền > 20$, giảm giá 10%
+   - Khai báo biến `minutes` (số phút gọi) và `messages` (số tin nhắn).
+   - Tính cước phí theo quy tắc: 0.1$/phút và 0.05$/tin nhắn.
+   - Nếu tổng cước phí (chưa giảm giá) lớn hơn 20$, hãy áp dụng giảm giá 10% trên tổng hóa đơn. In ra số tiền cuối cùng.
 
 2. **Kiểm tra năm nhuận**
-   - Một năm là năm nhuận nếu chia hết cho 4
-   - Tuy nhiên, nếu năm đó chia hết cho 100, thì phải chia hết cho 400 mới là năm nhuận
-   - Sử dụng cấu trúc `if` để kiểm tra một năm có phải năm nhuận hay không
+   - Viết chương trình kiểm tra một biến `year` có phải là năm nhuận hay không.
+   - **Gợi ý**: Một năm là năm nhuận nếu nó thỏa mãn một trong hai điều kiện sau:
+     1. Chia hết cho 4 nhưng không chia hết cho 100.
+     2. Chia hết cho 400.
+   - Sử dụng cấu trúc `if` lồng nhau hoặc toán tử logic (`&&`, `||`) để giải quyết.
 
-3. **Máy tính BMI**
+3. **Máy tính chỉ số BMI**
    - BMI = cân nặng (kg) / (chiều cao (m) * chiều cao (m))
    - Phân loại: < 18.5 (Thiếu cân), 18.5-24.9 (Bình thường), 25-29.9 (Thừa cân), >= 30 (Béo phì)
-   - Sử dụng `if-else if` để hiển thị phân loại dựa vào BMI
+   - Sử dụng `if-else if` để hiển thị phân loại dựa vào chỉ số BMI đã tính.
 
 ## Kết luận
 
-Trong phần này, chúng ta đã tập trung vào các bài tập cốt lõi về cấu trúc điều kiện trong JavaScript. Các bài tập đơn giản nhưng hiệu quả này giúp bạn hiểu cách sử dụng `if`, `if-else`, `if-else if` và `switch-case` để điều khiển luồng chương trình.
+Trong phần này, chúng ta đã đi sâu vào các cấu trúc điều kiện trong JavaScript. Việc nắm vững `if`, `if-else`, `if-else if`, và `switch-case` là nền tảng vững chắc để bạn giải quyết các bài toán lập trình phức tạp hơn.
 
 Những điểm chính cần nhớ:
-- Sử dụng `if` khi chỉ cần kiểm tra một điều kiện
-- Sử dụng `if-else` khi cần chọn một trong hai hành động
-- Sử dụng `if-else if` khi cần kiểm tra nhiều điều kiện liên tiếp
-- Sử dụng `switch-case` khi so sánh một biến với nhiều giá trị cụ thể
+- Sử dụng `if` khi chỉ cần kiểm tra một điều kiện.
+- Sử dụng `if-else` khi có hai luồng xử lý đối lập.
+- Sử dụng `if-else if` khi cần kiểm tra nhiều điều kiện độc lập.
+- Sử dụng `switch-case` như một giải pháp thay thế gọn gàng cho `if-else if` khi so sánh một biến với nhiều giá trị cụ thể.
 
-Để nâng cao kỹ năng lập trình:
-- Kết hợp kiến thức về biến và toán tử từ [Phần 1](/de-luyen-tap-javascript-cho-beginner-phan-1) với cấu trúc điều kiện
-- Thử thách bản thân với các bài tập mở rộng
-- Tìm hiểu thêm về [Cấu trúc điều kiện trong JavaScript](/cau-truc-dieu-kien-trong-javascript)
+Để nâng cao kỹ năng lập trình của bạn:
+- Kết hợp kiến thức về biến và toán tử từ [Phần 1](/de-luyen-tap-javascript-cho-beginner-phan-1) với cấu trúc điều kiện.
+- Thử thách bản thân với các bài tập mở rộng và tự đặt ra các vấn đề tương tự.
+- Đọc thêm bài viết chi tiết về [Cấu trúc điều kiện trong JavaScript](/cau-truc-dieu-kien-trong-javascript).
 
-Hãy tiếp tục thực hành và trong phần tiếp theo, chúng ta sẽ khám phá về vòng lặp - cấu trúc cho phép thực thi mã lặp đi lặp lại nhiều lần.
+Hãy tiếp tục duy trì thói quen thực hành. Trong phần tiếp theo, chúng ta sẽ [khám phá về vòng lặp](/vong-lap-trong-javascript) - một công cụ mạnh mẽ để thực thi mã lặp đi lặp lại.
 
-> **Lời nhắc**: Lập trình là kỹ năng thực hành. Càng luyện tập nhiều, bạn càng thành thạo!
+> **Lời nhắc**: Lập trình là một kỹ năng thực hành. Càng code nhiều, bạn càng giỏi!

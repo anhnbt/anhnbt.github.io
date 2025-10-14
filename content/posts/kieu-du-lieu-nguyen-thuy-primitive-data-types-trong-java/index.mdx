@@ -1,0 +1,289 @@
+---
+title: 'Kiểu dữ liệu nguyên thủy (Primitive Data Types) trong Java'
+date: 2025-01-14
+description: 'Tìm hiểu về 8 kiểu dữ liệu nguyên thủy trong Java: byte, short, int, long, float, double, boolean, char. Hướng dẫn chi tiết cách sử dụng và ví dụ thực tế.'
+tags:
+  - Java
+  - Programming
+slug: '/kieu-du-lieu-nguyen-thuy-primitive-data-types-trong-java'
+---
+
+Chào các bạn! Hôm nay mình sẽ cùng các bạn tìm hiểu về **Primitive Data Types** (Kiểu dữ liệu nguyên thủy) trong Java. Đây là một chủ đề cơ bản nhưng rất quan trọng mà bất kỳ lập trình viên Java nào cũng cần nắm vững.
+
+## Primitive Data Types là gì?
+
+Trong Java, **Primitive Data Types** là những kiểu dữ liệu cơ bản được định nghĩa sẵn trong ngôn ngữ. Chúng không phải là objects, mà được lưu trữ trực tiếp trong memory stack, giúp tăng tốc độ xử lý.
+
+Java cung cấp **8 kiểu dữ liệu nguyên thủy** chính:
+
+### 1. Kiểu số nguyên (Integer Types)
+
+#### `byte`
+
+- **Kích thước**: 8-bit
+- **Phạm vi**: -128 đến 127
+- **Sử dụng khi**: Cần tiết kiệm bộ nhớ trong các mảng lớn
+
+```java
+byte age = 25;
+byte temperature = -10;
+```
+
+#### `short`
+
+- **Kích thước**: 16-bit
+- **Phạm vi**: -32,768 đến 32,767
+- **Sử dụng khi**: Cần tiết kiệm bộ nhớ nhưng phạm vi của `byte` không đủ
+
+```java
+short year = 2025;
+short population = 30000;
+```
+
+#### `int`
+
+- **Kích thước**: 32-bit
+- **Phạm vi**: -2³¹ đến 2³¹-1 (khoảng -2.1 tỷ đến 2.1 tỷ)
+- **Sử dụng**: Đây là kiểu số nguyên được sử dụng phổ biến nhất
+
+```java
+int salary = 50000000;  // 50 triệu VND
+int distance = 1000;
+```
+
+#### `long`
+
+- **Kích thước**: 64-bit
+- **Phạm vi**: -2⁶³ đến 2⁶³-1
+- **Sử dụng khi**: Cần số nguyên rất lớn
+
+```java
+long phoneNumber = 84987654321L;  // Chú ý có L ở cuối
+long worldPopulation = 8000000000L;
+```
+
+### 2. Kiểu số thực (Floating-Point Types)
+
+#### `float`
+
+- **Kích thước**: 32-bit
+- **Độ chính xác**: Khoảng 7 chữ số thập phân
+- **Sử dụng khi**: Cần tiết kiệm bộ nhớ với mảng số thực lớn
+
+```java
+float price = 29.99f;  // Chú ý có f ở cuối
+float pi = 3.14159f;
+```
+
+#### `double`
+
+- **Kích thước**: 64-bit
+- **Độ chính xác**: Khoảng 15-16 chữ số thập phân
+- **Sử dụng**: Đây là kiểu số thực mặc định được khuyến nghị
+
+```java
+double exactPrice = 29.999999;
+double scientificNotation = 1.234e2;  // 123.4
+```
+
+### 3. Kiểu logic (Boolean Type)
+
+#### `boolean`
+
+- **Giá trị**: Chỉ có `true` hoặc `false`
+- **Sử dụng**: Để lưu trạng thái đúng/sai
+
+```java
+boolean isStudent = true;
+boolean hasPassport = false;
+boolean canVote = age >= 18;
+```
+
+### 4. Kiểu ký tự (Character Type)
+
+#### `char`
+
+- **Kích thước**: 16-bit
+- **Phạm vi**: 0 đến 65,535 (hỗ trợ Unicode)
+- **Sử dụng**: Lưu trữ một ký tự Unicode
+
+```java
+char grade = 'A';
+char vietnameseChar = 'ư';
+char unicodeChar = '\u0041';  // Ký tự 'A'
+```
+
+## Giá trị mặc định
+
+Khi bạn khai báo biến mà không khởi tạo giá trị, Java sẽ tự động gán giá trị mặc định:
+
+```java
+public class DefaultValues {
+    static byte defaultByte;       // 0
+    static short defaultShort;     // 0
+    static int defaultInt;         // 0
+    static long defaultLong;       // 0L
+    static float defaultFloat;     // 0.0f
+    static double defaultDouble;   // 0.0
+    static boolean defaultBoolean; // false
+    static char defaultChar;       // '\u0000' (null character)
+}
+```
+
+**Lưu ý**: Giá trị mặc định chỉ áp dụng cho **instance variables** và **static variables**. **Local variables** bắt buộc phải được khởi tạo trước khi sử dụng.
+
+## Literals - Cách viết giá trị trực tiếp
+
+### Integer Literals
+
+```java
+// Hệ thập phân (Decimal)
+int decimal = 26;
+
+// Hệ thập lục phân (Hexadecimal) - bắt đầu với 0x
+int hex = 0x1A;
+
+// Hệ nhị phân (Binary) - bắt đầu với 0b
+int binary = 0b11010;
+
+// Sử dụng underscore để dễ đọc (Java 7+)
+long creditCard = 1234_5678_9012_3456L;
+int million = 1_000_000;
+```
+
+### Floating-Point Literals
+
+```java
+// Double (mặc định)
+double d1 = 123.4;
+double d2 = 1.234e2;  // Scientific notation = 123.4
+
+// Float (cần có f/F)
+float f1 = 123.4f;
+float f2 = 1.234e2f;
+```
+
+### Character và String Literals
+
+```java
+// Character literals - dùng dấu nháy đơn
+char letter = 'A';
+char tab = '\t';
+char newline = '\n';
+char unicode = '\u0041';  // 'A'
+
+// String literals - dùng dấu nháy đôi
+String message = "Xin chào";
+String path = "C:\\Users\\Documents";  // Escape backslash
+```
+
+## Ví dụ thực tế
+
+Hãy cùng xem một ví dụ tính toán lương thực tế:
+
+```java
+public class SalaryCalculator {
+    public static void main(String[] args) {
+        // Thông tin cơ bản
+        byte workingDays = 22;
+        short baseSalary = 500;  // 500k per day
+        int monthlyBonus = 2000000;  // 2 triệu
+        long yearlyIncome = 0;
+
+        // Tính toán
+        int dailyIncome = baseSalary * 1000;  // Chuyển thành VND
+        long monthlyIncome = (long) workingDays * dailyIncome + monthlyBonus;
+        yearlyIncome = monthlyIncome * 12;
+
+        // Thuế TNCN (10%)
+        double taxRate = 0.1;
+        double monthlyTax = monthlyIncome * taxRate;
+        double netMonthlyIncome = monthlyIncome - monthlyTax;
+
+        // Hiển thị kết quả
+        boolean isHighIncome = netMonthlyIncome > 20_000_000;
+
+        System.out.println("Thu nhập tháng (trước thuế): " + monthlyIncome + " VND");
+        System.out.println("Thu nhập tháng (sau thuế): " + (int)netMonthlyIncome + " VND");
+        System.out.println("Thu nhập cao: " + isHighIncome);
+    }
+}
+```
+
+## Type Casting và Conversion
+
+Khi làm việc với các kiểu dữ liệu khác nhau, đôi khi bạn cần chuyển đổi:
+
+### Implicit Casting (Tự động)
+
+```java
+byte b = 10;
+short s = b;    // byte -> short (OK)
+int i = s;      // short -> int (OK)
+long l = i;     // int -> long (OK)
+float f = l;    // long -> float (OK)
+double d = f;   // float -> double (OK)
+```
+
+### Explicit Casting (Ép kiểu)
+
+```java
+double d = 123.45;
+int i = (int) d;        // 123 (mất phần thập phân)
+byte b = (byte) i;      // Có thể mất dữ liệu nếu i > 127
+```
+
+## Tips và Best Practices
+
+### 1. Chọn kiểu dữ liệu phù hợp
+
+- Sử dụng `int` cho số nguyên thông thường
+- Sử dụng `double` cho số thực
+- Chỉ dùng `byte`, `short` khi thực sự cần tiết kiệm bộ nhớ
+- Sử dụng `long` khi giá trị có thể vượt quá phạm vi của `int`
+
+### 2. Cẩn thận với overflow
+
+```java
+int maxInt = Integer.MAX_VALUE;
+System.out.println(maxInt);      // 2147483647
+System.out.println(maxInt + 1);  // -2147483648 (overflow!)
+
+// Giải pháp: sử dụng long
+long safeLong = (long) maxInt + 1;
+System.out.println(safeLong);    // 2147483648
+```
+
+### 3. Không dùng float/double cho tiền tệ
+
+```java
+// Sai ❌
+double money = 0.1 + 0.2;
+System.out.println(money);  // 0.30000000000000004
+
+// Đúng ✅
+import java.math.BigDecimal;
+BigDecimal money = new BigDecimal("0.1").add(new BigDecimal("0.2"));
+System.out.println(money);  // 0.3
+```
+
+### 4. Sử dụng underscore cho số lớn
+
+```java
+// Khó đọc ❌
+int population = 83000000;
+
+// Dễ đọc ✅
+int population = 83_000_000;
+```
+
+## Tổng kết
+
+Primitive Data Types là nền tảng của Java programming. Hiểu rõ về chúng sẽ giúp bạn:
+
+- Viết code hiệu quả hơn
+- Tránh được các lỗi overflow
+- Quản lý bộ nhớ tối ưu
+- Chọn được kiểu dữ liệu phù hợp
+
+Trong bài viết tiếp theo, mình sẽ cùng các bạn tìm hiểu về **Reference Types** và sự khác biệt với Primitive Types. Hãy thử làm một vài bài tập với các kiểu dữ liệu này để củng cố kiến thức nhé!

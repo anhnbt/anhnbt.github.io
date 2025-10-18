@@ -1,0 +1,79 @@
+---
+title: Vòng lặp trong Java: Hướng dẫn chi tiết cho người mới bắt đầu
+date: 2025-10-18
+description: Tìm hiểu các loại vòng lặp trong Java, ví dụ thực tế và cách sử dụng hiệu quả cho lập trình viên mới và trung cấp.
+tags:
+  - Java
+  - Vòng lặp
+  - Lập trình cơ bản
+  - Học lập trình
+banner: ./banner.jpg
+---
+
+## Giới thiệu
+
+Vòng lặp trong Java là một khái niệm cực kỳ quan trọng giúp bạn thực hiện lặp lại các thao tác một cách tự động, tiết kiệm thời gian và công sức khi lập trình. Nếu bạn là người mới học hoặc đang muốn củng cố kiến thức về vòng lặp trong Java, bài viết này sẽ giúp bạn hiểu rõ các loại vòng lặp, cách sử dụng và ví dụ thực tế để áp dụng ngay vào dự án của mình.
+
+## Nội dung chính
+
+### Các loại vòng lặp trong Java
+
+Java cung cấp nhiều loại vòng lặp khác nhau, mỗi loại phù hợp với từng tình huống cụ thể:
+
+#### 1. Vòng lặp for
+
+Vòng lặp for thường dùng khi biết trước số lần lặp.
+
+```java
+for (int i = 0; i < 5; i++) {
+    System.out.println("Lần lặp thứ " + i);
+}
+```
+
+````
+
+#### 2. Vòng lặp while
+
+Vòng lặp while dùng khi chưa biết trước số lần lặp, chỉ cần điều kiện đúng thì sẽ tiếp tục lặp.
+
+```java
+int count = 0;
+while (count < 5) {
+    System.out.println("Count: " + count);
+    count++;
+}
+```
+
+#### 3. Vòng lặp do-while
+
+Vòng lặp do-while đảm bảo khối lệnh được thực hiện ít nhất một lần, sau đó kiểm tra điều kiện.
+
+```java
+int num = 0;
+do {
+    System.out.println("Số hiện tại: " + num);
+    num++;
+} while (num < 3);
+```
+
+### Khi nào nên dùng từng loại vòng lặp trong Java?
+
+- **for**: Khi biết trước số lần lặp.
+- **while**: Khi cần lặp đến khi điều kiện không còn đúng.
+- **do-while**: Khi muốn thực hiện ít nhất một lần trước khi kiểm tra điều kiện.
+
+#### Mẹo sử dụng vòng lặp trong Java hiệu quả
+
+- Luôn kiểm tra điều kiện lặp để tránh vòng lặp vô hạn.
+- Sử dụng break và continue để kiểm soát luồng lặp khi cần thiết.
+- Kết hợp vòng lặp với mảng hoặc danh sách để xử lý dữ liệu hàng loạt.
+
+## Tóm tắt
+
+Qua bài viết này, bạn đã nắm được các loại vòng lặp trong Java, cách sử dụng và ví dụ thực tế. Vòng lặp là công cụ mạnh mẽ giúp bạn tối ưu hóa mã nguồn và giải quyết các bài toán lặp lại một cách hiệu quả. Hãy luyện tập thường xuyên để thành thạo và áp dụng vào các dự án thực tế nhé!
+
+## Tài nguyên bổ sung
+
+- [Tài liệu chính thức về vòng lặp Java](https://docs.oracle.com/javase/tutorial/java/nutsandbolts/for.html)
+- [Hướng dẫn Java cho người mới bắt đầu](https://www.w3schools.com/java/java_for_loop.asp)
+````

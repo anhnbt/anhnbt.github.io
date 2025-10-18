@@ -1,0 +1,93 @@
+---
+title: Hiểu về Access Modifier, Static Method và Static Property trong Java
+date: 2025-10-18
+description: Tìm hiểu chi tiết về access modifier, static method, static property trong Java với ví dụ thực tế, giúp bạn viết code chuyên nghiệp hơn.
+tags:
+  - Java
+  - OOP
+  - access modifier
+  - static method
+  - static property
+banner: ./banner.jpg
+---
+
+## Giới thiệu
+
+Trong lập trình hướng đối tượng với Java, các khái niệm như access modifier, static method và static property đóng vai trò cực kỳ quan trọng để kiểm soát quyền truy cập, tổ chức mã nguồn hiệu quả và tối ưu hiệu năng. Bài viết này sẽ giúp bạn hiểu rõ cách sử dụng access modifier, static method, static property trong Java, từ đó nâng cao kỹ năng viết code và bảo vệ dữ liệu trong ứng dụng của mình.
+
+## Nội dung chính
+
+### Access Modifier là gì?
+
+Access modifier (bộ điều chỉnh quyền truy cập) giúp bạn kiểm soát mức độ truy cập của các thuộc tính và phương thức trong class. Trong Java, có 4 loại access modifier phổ biến: `public`, `private`, `protected`, và mặc định (package-private).
+
+```java
+public class User {
+    private String name; // access modifier: private
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        User user = new User("WanBi");
+        System.out.println(user.getName()); // WanBi
+        // System.out.println(user.name); // Lỗi: Không truy cập được
+    }
+}
+```
+
+#### Lưu ý khi dùng access modifier
+
+- `private`: Chỉ truy cập được bên trong class.
+- `protected`: Truy cập được trong cùng package hoặc subclass.
+- `public`: Truy cập mọi nơi.
+- Mặc định (không ghi gì): Truy cập trong cùng package.
+- Giúp bảo vệ dữ liệu, tránh bị sửa ngoài ý muốn.
+
+### Static Method và Static Property trong Java
+
+Static method (phương thức tĩnh) và static property (thuộc tính tĩnh) là những thành phần thuộc về class, không thuộc về instance. Bạn truy cập chúng trực tiếp qua tên class trong Java.
+
+```java
+public class MathUtil {
+    public static final double PI = 3.14159; // static property
+
+    public static double getCircleArea(double radius) { // static method
+        return PI * radius * radius;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(MathUtil.PI); // 3.14159
+        System.out.println(MathUtil.getCircleArea(2)); // 12.56636
+    }
+}
+```
+
+#### Khi nào nên dùng static method và static property?
+
+- Khi bạn cần các hàm tiện ích hoặc giá trị dùng chung cho mọi instance.
+- Static method chỉ truy cập được các thuộc tính static, không truy cập được thuộc tính non-static (instance).
+- Static property thường dùng cho hằng số hoặc dữ liệu dùng chung.
+
+### So sánh access modifier với static method/property
+
+- Access modifier kiểm soát quyền truy cập (private, public, protected, package-private).
+- Static method/property giúp chia sẻ logic hoặc dữ liệu chung cho toàn bộ class, không phụ thuộc vào instance.
+
+## Tóm tắt
+
+Qua bài viết này, bạn đã nắm được cách sử dụng access modifier, static method và static property trong Java. Việc hiểu và áp dụng đúng các khái niệm này sẽ giúp bạn viết code an toàn, dễ bảo trì và chuyên nghiệp hơn. Đừng ngần ngại thử nghiệm và áp dụng vào dự án thực tế nhé!
+
+## Tài nguyên bổ sung
+
+- [Oracle Java Tutorials: Classes and Objects](https://docs.oracle.com/javase/tutorial/java/javaOO/classes.html)
+- [Access Modifiers in Java](https://www.geeksforgeeks.org/access-modifiers-java/)

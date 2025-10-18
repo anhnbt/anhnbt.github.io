@@ -1,0 +1,90 @@
+---
+title: Tìm hiểu về JDK, JRE, JVM: Nền tảng cốt lõi cho lập trình Java
+date: 2025-10-18
+description: Khám phá sự khác biệt giữa JDK, JRE, JVM và vai trò của chúng trong phát triển Java. Bài viết giải thích dễ hiểu, ví dụ thực tế.
+tags:
+  - Java
+  - JVM
+  - JDK
+  - JRE
+  - Programming
+  - Backend
+banner: ./banner.jpg
+---
+
+## Giới thiệu
+
+Bạn mới bắt đầu học Java và thường nghe nhắc đến các thuật ngữ như JDK, JRE, JVM nhưng chưa thực sự hiểu rõ chúng khác nhau như thế nào? Bài viết này sẽ giúp bạn **tìm hiểu về JDK, JRE, JVM** một cách dễ hiểu, thực tế và có ví dụ minh họa. Sau khi đọc xong, bạn sẽ biết cách phân biệt, lựa chọn và sử dụng đúng các thành phần này trong quá trình lập trình Java.
+
+## Nội dung chính
+
+### JDK, JRE, JVM là gì? (Tìm hiểu về JDK, JRE, JVM)
+
+- **JDK (Java Development Kit):** Bộ công cụ dành cho lập trình viên Java, bao gồm trình biên dịch (javac), thư viện chuẩn, công cụ debug, và cả JRE.
+- **JRE (Java Runtime Environment):** Môi trường chạy ứng dụng Java, gồm JVM và các thư viện cần thiết để chạy chương trình đã biên dịch.
+- **JVM (Java Virtual Machine):** Máy ảo Java, chịu trách nhiệm thực thi bytecode Java trên nhiều nền tảng khác nhau.
+
+#### Minh họa bằng sơ đồ
+
+```
++-------------------+
+|    JDK            |
+|  +-------------+  |
+|  |   JRE       |  |
+|  | +--------+  |  |
+|  | | JVM    |  |  |
+|  | +--------+  |  |
+|  +-------------+  |
++-------------------+
+```
+
+### Quá trình chạy một chương trình Java
+
+Khi bạn viết mã Java, quá trình chạy sẽ diễn ra như sau:
+
+1. **Viết mã nguồn (.java)**
+2. **Biên dịch bằng JDK (javac) → Tạo file .class (bytecode)**
+3. **JVM trong JRE thực thi bytecode**
+
+```java
+// Ví dụ đơn giản về chương trình Java
+public class HelloWorld {
+  public static void main(String[] args) {
+    System.out.println("Xin chào, Java và JVM!");
+  }
+}
+```
+
+### Khi nào cần JDK, khi nào chỉ cần JRE?
+
+- **Lập trình viên:** Cần cài đặt JDK để có thể biên dịch và chạy chương trình Java.
+- **Người dùng cuối:** Chỉ cần JRE để chạy các ứng dụng Java đã được biên dịch sẵn.
+
+#### So sánh nhanh
+
+| Thành phần | Dùng để phát triển | Dùng để chạy ứng dụng |
+| ---------- | ------------------ | --------------------- |
+| JDK        | ✔️                 | ✔️                    |
+| JRE        | ❌                 | ✔️                    |
+| JVM        | ❌                 | ✔️                    |
+
+### Tìm hiểu về JDK, JRE, JVM qua ví dụ thực tế
+
+Giả sử bạn tải một ứng dụng Java về máy, nếu chỉ muốn chạy ứng dụng, bạn chỉ cần JRE. Nhưng nếu muốn sửa mã nguồn, biên dịch lại, bạn cần JDK.
+
+```bash
+# Kiểm tra phiên bản JDK
+javac -version
+
+# Kiểm tra phiên bản JRE/JVM
+java -version
+```
+
+## Tóm tắt
+
+Qua bài viết này, bạn đã **tìm hiểu về JDK, JRE, JVM** và hiểu rõ vai trò của từng thành phần trong hệ sinh thái Java. Việc nắm vững kiến thức này sẽ giúp bạn tự tin hơn khi cài đặt, cấu hình môi trường phát triển và giải quyết các vấn đề thường gặp khi học Java. Hãy áp dụng ngay để tối ưu quá trình học và làm việc với Java nhé!
+
+## Tài nguyên bổ sung
+
+- [Tài liệu chính thức Oracle về JDK, JRE, JVM](https://docs.oracle.com/javase/8/docs/)
+- [Java Platform Overview (Baeldung)](https://www.baeldung.com/jvm-vs-jre-vs-jdk)

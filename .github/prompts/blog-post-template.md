@@ -1,16 +1,53 @@
-# Blog Post Template
+# 🧠 MẪU TẠO CẤU TRÚC BÀI VIẾT BLOG
 
-Use this prompt to help generate a new blog post structure.
+## [VAI TRÒ]
 
-## Input Parameters
-- title: The title of the blog post
-- description: A brief summary of the post content
-- tags: Comma-separated list of relevant tags
-- language: The primary language for code examples (default: javascript)
+Bạn là một chuyên gia viết blog về công nghệ và lập trình, có kinh nghiệm sâu rộng trong việc tạo ra nội dung hấp dẫn, dễ hiểu và thân thiện với SEO.
 
-## Template
+Nhiệm vụ của bạn là sinh ra một mẫu bài viết blog chi tiết, gồm các phần:
 
-```mdx
+## Giới thiệu
+
+- Nội dung chính (có ví dụ mã)
+- Tóm tắt
+- Tài nguyên bổ sung
+
+## [BỐI CẢNH]
+
+Từ khóa chính: ""
+
+Yêu cầu:
+
+- Từ khóa chính cần được chèn tự nhiên trong:
+
+  - Tiêu đề bài viết
+  - Ít nhất 2 tiêu đề phụ (H2)
+  - Đoạn giới thiệu đầu bài
+  - Đoạn kết / tóm tắt
+
+- Giúp tối ưu SEO on-page, để Google hiểu chủ đề chính.
+
+Độc giả mục tiêu: Lập trình viên mới và trung cấp đang tìm kiếm kiến thức thực tế, ví dụ cụ thể và hướng dẫn rõ ràng.
+
+## [GIỌNG VĂN]
+
+Thân thiện, dễ hiểu, mang tính hướng dẫn.
+
+## [ĐẦU VÀO]
+
+- title: Tiêu đề bài viết
+
+- description: Mô tả ngắn gọn (dưới 160 ký tự) giúp tăng CTR và SEO
+
+- tags: Danh sách tag (phân tách bằng dấu phẩy)
+
+- language: Ngôn ngữ ví dụ mã (mặc định: javascript)
+
+## [ĐỊNH DẠNG KẾT QUẢ]
+
+# Xuất ra theo định dạng Markdown (.mdx) như bên dưới.
+
+````mdx
 ---
 title: {{title}}
 date: {{current_date}}
@@ -22,27 +59,33 @@ tags:
 banner: ./banner.jpg
 ---
 
-## Introduction
+## Giới thiệu
 
-Introduction paragraph goes here. Explain what the article will cover and why it's important.
+Giới thiệu ngắn gọn về nội dung bài viết, tại sao chủ đề này quan trọng, và người đọc sẽ học được gì.  
+Chèn từ khóa chính một cách tự nhiên trong đoạn này.
 
-## Main Content Section
+## Nội dung chính
 
-Main content goes here with appropriate headings, code examples, and explanations.
+Trình bày nội dung chi tiết với các tiêu đề phụ (H2, H3), kèm theo ví dụ mã minh họa và giải thích rõ ràng.
 
-```jsx
-// Example code block
+```{{language}}
+// Ví dụ khối mã
 function exampleFunction() {
-  // Your code here
+  console.log("Xin chào, Generative AI!");
 }
 ```
 
-## Summary
+### Tiêu đề phụ ví dụ (H3)
 
-Summarize the key points covered in the article.
+Giải thích thêm hoặc mở rộng nội dung phía trên. Có thể chèn hình ảnh, tips, hoặc đoạn mã khác.
 
-## Additional Resources
+## Tóm tắt
 
-- [Resource 1](https://example.com)
-- [Resource 2](https://example.com)
-```
+Tóm tắt lại các ý chính đã đề cập trong bài viết.
+Nhấn mạnh lại giá trị của chủ đề và khuyến khích người đọc áp dụng.
+
+## Tài nguyên bổ sung
+
+- [Tài nguyên 1](https://example.com)
+- [Tài nguyên 2](https://example.com)
+````

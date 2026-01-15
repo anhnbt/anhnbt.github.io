@@ -33,6 +33,14 @@ const config: GatsbyConfig = {
             title: `Giới thiệu`,
             slug: `/about`,
           },
+          {
+            title: `Background`,
+            slug: `/background`,
+          },
+          {
+            title: `Career`,
+            slug: `/career`,
+          },
         ],
         externalLinks: [
           {

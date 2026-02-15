@@ -1,0 +1,234 @@
+---
+title: Hướng dẫn Implement tính năng Upload ảnh (Spring Boot + React)
+date: 2026-02-15
+description: Hướng dẫn chi tiết cách implement tính năng upload ảnh trong ứng dụng Spring Boot kết hợp với React, bao gồm cả backend và frontend.
+tags:
+  - Spring Boot
+  - React
+  - Upload ảnh
+banner: ./banner.jpg
+---
+
+Bài viết này sẽ hướng dẫn step-by-step cách xây dựng tính năng upload ảnh "chuẩn chỉ" cho hệ thống Salon Management. Chúng ta sẽ giải quyết các vấn đề thực tế:
+1.  **Lưu trữ ngoài Project**: Tránh làm phình source code, dễ dàng backup/migrate.
+2.  **Tổ chức thư mục theo ngày**: Tránh việc một thư mục chứa quá nhiều file (OS limit/performance issue).
+3.  **Bảo mật & Cấu hình**: Cấp quyền truy cập public file, cấu hình giới hạn kích thước file.
+4.  **Frontend Integration**: Xử lý `Multipart/form-data` đúng cách.
+
+## Phần 1: Cấu hình Backend (Spring Boot)
+
+### 1.1. Định nghĩa thư mục lưu trữ ([.env](cci:7://file:///Users/wanbi/Code/freelance/yocheckin/services/api/saas-salon-management/.env:0:0-0:0) & [application.yml](cci:7://file:///Users/wanbi/Code/freelance/yocheckin/services/api/saas-salon-management/src/main/resources/application.yml:0:0-0:0))
+Thay vì hardcode đường dẫn, ta dùng biến môi trường để linh hoạt giữa các môi trường (Dev/Prod).
+
+**File `.env`:**
+```properties
+# Điểm đến cho file upload (nằm ngoài thư mục project)
+APP_UPLOAD_DIRECTORY=/Users/wanbi/Code/freelance/yocheckin/uploads
+```
+
+File `application.yml`: Map biến môi trường vào cấu hình Spring và tăng giới hạn upload (mặc định Tomcat chỉ cho 1MB).
+
+```yaml
+app:
+  upload:
+    directory: ${APP_UPLOAD_DIRECTORY:${user.home}/uploads} # Fallback về home nếu thiếu env
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+```
+
+1.2. Mở quyền truy cập Public  (SecurityConfig.java)
+
+Mặc định Spring Security sẽ chặn tẩt cả request. Cần mở endpoint xem ảnh `/uploads/**`.
+
+```java
+// SecurityConfig.java
+private static final List<String> NO_AUTH_ENDPOINTS = List.of(
+    // ... các endpoint khác
+    "/uploads/**" // Cho phép xem ảnh public
+);
+
+// Trong filterChain:
+.requestMatchers(NO_AUTH_ENDPOINTS.toArray(new String[0])).permitAll()
+```
+
+### 1.3. Map URL vào Thư mục vật lý (`WebConfig.java`)
+
+Cần chỉ cho Spring Web biết khi user gọi http://api.../uploads/xyz.jpg thì tìm file đó ở đâu trên ổ cứng.
+
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Value("${app.upload.directory}")
+    private String uploadDirectory;
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Đảm bảo path kết thúc bằng dấu /
+        String location = uploadDirectory.endsWith("/") ? uploadDirectory : uploadDirectory + "/";
+        
+        // Map URL /uploads/** -> Thư mục vật lý
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + location);
+    }
+}
+```
+
+## Phần 2: Logic Lưu trữ (Backend Service)
+
+### 2.1. FileSystemStorageService.java
+
+Đây là trái tim của tính năng. Logic bao gồm:
+
+1. Tạo thư mục `yyyy/MM/dd` theo ngày hiện tại.
+2. Đổi tên file (UUID) để tránh trùng lặp.
+3. Lưu file và trả về đường dẫn tương đối để lưu vào DB.
+
+```java
+@Service
+public class FileSystemStorageService implements StorageService {
+
+    @Value("${app.upload.directory}")
+    private String uploadDirectory;
+    private Path rootLocation;
+
+    @PostConstruct
+    public void init() {
+        // Khởi tạo thư mục gốc nếu chưa có
+        this.rootLocation = Paths.get(uploadDirectory).toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(rootLocation);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not initialize storage", e);
+        }
+    }
+
+    @Override
+    public String store(MultipartFile file) {
+        try {
+            if (file.isEmpty()) throw new RuntimeException("Failed to store empty file.");
+
+            // 1. Tổ chức thư mục theo ngày: 2024/02/15
+            LocalDate now = LocalDate.now();
+            String datePath = String.format("%d/%02d/%02d", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
+            Path destinationDir = this.rootLocation.resolve(Paths.get(datePath));
+            
+            if (!Files.exists(destinationDir)) {
+                Files.createDirectories(destinationDir);
+            }
+
+            // 2. Tạo tên file unique
+            String ext = "";
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename != null && originalFilename.contains(".")) {
+                ext = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String filename = UUID.randomUUID().toString() + ext;
+
+            // 3. Lưu file
+            Path destinationFile = destinationDir.resolve(filename);
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            // 4. Trả về đường dẫn tương đối: 2024/02/15/uuid-abc.jpg
+            return datePath + "/" + filename;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file.", e);
+        }
+    }
+}
+```
+
+### 2.2. UploadController.java
+
+Endpoint nhận file và trả về URL đầy đủ cho Frontend hiển thị ngay lập tức (Preview).
+
+```java
+@PostMapping
+public ResponseEntity<ApiResponse<Map<String, String>>> handleFileUpload(@RequestParam("file") MultipartFile file) {
+    // Service trả về: 2024/02/15/abc.jpg
+    String relativePath = storageService.store(file);
+
+    // Build URL full: http://localhost:8080/uploads/2024/02/15/abc.jpg
+    String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("/uploads/")
+            .path(relativePath) 
+            .toUriString();
+
+    Map<String, String> responseData = new HashMap<>();
+    responseData.put("url", fileUrl);
+    responseData.put("filename", relativePath);
+
+    return ResponseEntity.ok(new ApiResponse<>(responseData));
+}
+```
+
+## Phần 3: Frontend Integration (React/JS)
+
+### 3.1. Upload Service (`uploadService.js`)
+
+Lưu ý quan trọng: Khi gửi `FormData`, header `Content-Type` phải để là `undefined` (hoặc không set). Browser sẽ tự động set thành `multipart/form-data; boundary=----WebKitFormBoundary....` Nếu set tay thành `multipart/form-data`, request sẽ thiếu `boundary` và Backend sẽ báo lỗi.
+
+```js
+import { httpService } from '@/shared/services/httpService'
+
+const uploadFile = async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    // Option explicit Content-Type: undefined để browser tự handle boundary
+    return await httpService.post('/api/upload', formData, {
+        headers: {
+            'Content-Type': undefined, 
+        },
+    })
+}
+```
+
+### 3.2.Component (`PersonalInformation.jsx`)
+
+Xử lý chọn file, xem trước (preview) và gọi upload.
+
+```jsx
+const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    // 1. Validate sơ bộ
+    if (file.size > 50 * 1024 * 1024) { // 50MB
+        toast.error("File quá lớn!")
+        return
+    }
+
+    // 2. Preview ảnh ngay lập tức (UI/UX)
+    const reader = new FileReader()
+    reader.onload = (event) => setAvatarPreview(event.target.result)
+    reader.readAsDataURL(file)
+
+    // 3. Upload lên server
+    try {
+        const response = await uploadService.uploadFile(file)
+        if (response.success) {
+            // response.data.url là URL full để hiển thị, lưu vào form state
+            setFormData(prev => ({ ...prev, avatar: response.data.url }))
+            toast.success("Upload thành công!")
+        }
+    } catch (error) {
+        toast.error("Upload thất bại")
+    }
+}
+```
+
+### Kết quả
+
+Với cấu trúc này:
+
+1. Ảnh nằm ở thư mục riêng, an toàn khi redeploy app.
+2. Sau 1 năm vận hành, folder `uploads` không bị chứa hàng triệu file hỗn độn mà chia gọn gàng theo ngày.
+3. Dễ dàng backup (chỉ cần copy folder `uploads`).
+4. Dễ dàng scale (sau này có thể đổi `StorageService` sang S3 mà không sửa Controller/Frontend).

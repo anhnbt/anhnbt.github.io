@@ -4,508 +4,395 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nguyễn Bá Tuấn Anh - Java Web Developer</title>
+  <title>Nguyễn Bá Tuấn Anh - Java Web Developer Full-Stack</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Online CV of Nguyễn Bá Tuấn Anh - Java Web Developer Full-Stack & Instructor at CodeGym Vietnam. 8+ years of experience.">
+  <meta name="author" content="Nguyễn Bá Tuấn Anh">
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Font Awesome -->
+  <!-- Font Awesome Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts (Outfit, Plus Jakarta Sans, JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Owl Carousel CSS -->
-  <link rel="stylesheet" href="assets/owl.carousel.min.css">
-  <link rel="stylesheet" href="assets/owl.theme.default.min.css">
-
-  <!-- WOW.js CSS -->
-  <link rel="stylesheet" href="css/animate.min.css">
-
-  <!-- Custom Styles -->
+  <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <div class="container">
-    <!-- Header Section -->
-    <header class="header">
-      <div class="profile-section">
-        <div class="avatar">
-          <i class="fas fa-user"></i>
-        </div>
-        <div class="basic-info">
-          <h1 class="name">Nguyễn Bá Tuấn Anh</h1>
-          <p class="title">Java Web Developer Full-Stack</p>
-          <div class="contact-info">
-            <div class="contact-item">
-              <i class="fas fa-envelope"></i>
-              <a href="mailto:anhnbt.it@gmail.com">anhnbt.it@gmail.com</a>
-            </div>
-            <div class="contact-item">
-              <i class="fas fa-phone"></i>
-              <a href="tel:0349876595">0349876595</a>
-            </div>
-            <div class="contact-item">
-              <i class="fab fa-github"></i>
-              <a href="https://github.com/anhnbt" target="_blank">github.com/anhnbt</a>
-            </div>
-            <div class="contact-item">
-              <i class="fas fa-map-marker-alt"></i>
-              <span>Phường Hoàng Liệt, TP Hà Nội</span>
+  <!-- Fixed Toggle controls -->
+  <div class="top-controls">
+    <button id="theme-toggle" class="control-btn" aria-label="Toggle Dark/Light Mode" title="Toggle Theme">
+      <i class="fas fa-moon"></i>
+    </button>
+    <button id="view-toggle" class="control-btn accent-toggle" aria-label="Toggle Java Code View" title="Toggle Developer View">
+      <i class="fas fa-code"></i> <span>Java View</span>
+    </button>
+    <button id="print-btn" class="control-btn" aria-label="Print Resume" title="Print CV">
+      <i class="fas fa-print"></i>
+    </button>
+  </div>
+
+  <div class="cv-container">
+    <!-- 1. STANDARD UI LAYOUT -->
+    <div id="ui-layout" class="cv-layout active">
+      <!-- Header -->
+      <header class="cv-header">
+        <div class="header-main">
+          <div class="avatar-box">
+            <span class="initials">TA</span>
+            <div class="pulse-ring"></div>
+          </div>
+          <div class="header-intro">
+            <span class="role-badge">Java Web Instructor & Engineer</span>
+            <h1 id="cv-name" class="candidate-name">Nguyễn Bá Tuấn Anh</h1>
+            <p class="candidate-tagline">Building highly performant web systems, coaching future developers, and designing clean architectures.</p>
+            <div class="candidate-meta">
+              <span class="meta-item"><i class="fas fa-map-marker-alt"></i> Hoàng Liệt, Hoàng Mai, Hà Nội</span>
+              <span class="meta-item"><i class="fas fa-briefcase"></i> CodeGym Vietnam</span>
             </div>
           </div>
         </div>
+      </header>
+
+      <!-- Main Columns -->
+      <div class="cv-grid">
+        <!-- Sidebar -->
+        <aside class="cv-sidebar">
+          <!-- Contact Details -->
+          <section class="cv-card" id="contact-info">
+            <h2 class="card-headline"><i class="fas fa-address-card"></i> Contact Information</h2>
+            <div class="contact-links">
+              <a href="mailto:anhnbt.it@gmail.com" class="contact-row">
+                <span class="contact-icon"><i class="fas fa-envelope"></i></span>
+                <div class="contact-data">
+                  <span class="data-label">Email</span>
+                  <span class="data-val">anhnbt.it@gmail.com</span>
+                </div>
+              </a>
+              <a href="tel:0349876595" class="contact-row">
+                <span class="contact-icon"><i class="fas fa-phone"></i></span>
+                <div class="contact-data">
+                  <span class="data-label">Phone</span>
+                  <span class="data-val">0349876595</span>
+                </div>
+              </a>
+              <a href="https://github.com/anhnbt" target="_blank" rel="noopener noreferrer" class="contact-row">
+                <span class="contact-icon"><i class="fab fa-github"></i></span>
+                <div class="contact-data">
+                  <span class="data-label">GitHub</span>
+                  <span class="data-val">github.com/anhnbt</span>
+                </div>
+              </a>
+              <div class="contact-row">
+                <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
+                <div class="contact-data">
+                  <span class="data-label">Location</span>
+                  <span class="data-val">Phường Hoàng Liệt, Hà Nội</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Core Skills -->
+          <section class="cv-card" id="skills-list">
+            <h2 class="card-headline"><i class="fas fa-tools"></i> Key Skills</h2>
+            <div class="skills-container">
+              <div class="skill-group">
+                <h3 class="skill-group-title">Backend Development</h3>
+                <div class="badge-set">
+                  <span class="skill-badge">Java</span>
+                  <span class="skill-badge">Spring Boot</span>
+                  <span class="skill-badge">Spring MVC</span>
+                  <span class="skill-badge">REST API</span>
+                  <span class="skill-badge">Microservices</span>
+                  <span class="skill-badge">JWT</span>
+                </div>
+              </div>
+
+              <div class="skill-group">
+                <h3 class="skill-group-title">Frontend Systems</h3>
+                <div class="badge-set">
+                  <span class="skill-badge">ReactJS</span>
+                  <span class="skill-badge">Angular</span>
+                  <span class="skill-badge">React Native (Expo)</span>
+                  <span class="skill-badge">HTML5 & CSS3</span>
+                  <span class="skill-badge">JavaScript (ES6+)</span>
+                  <span class="skill-badge">TypeScript</span>
+                </div>
+              </div>
+
+              <div class="skill-group">
+                <h3 class="skill-group-title">Database Management</h3>
+                <div class="badge-set">
+                  <span class="skill-badge">MySQL</span>
+                  <span class="skill-badge">PostgreSQL</span>
+                  <span class="skill-badge">SQL Server</span>
+                  <span class="skill-badge">Oracle Database</span>
+                </div>
+              </div>
+
+              <div class="skill-group">
+                <h3 class="skill-group-title">DevOps & Systems</h3>
+                <div class="badge-set">
+                  <span class="skill-badge">Docker</span>
+                  <span class="skill-badge">Nginx</span>
+                  <span class="skill-badge">Apache Tomcat</span>
+                  <span class="skill-badge">Ubuntu/CentOS</span>
+                  <span class="skill-badge">Windows Server</span>
+                </div>
+              </div>
+
+              <div class="skill-group">
+                <h3 class="skill-group-title">Other methodologies</h3>
+                <div class="badge-set">
+                  <span class="skill-badge">Git Version Control</span>
+                  <span class="skill-badge">Agile Scrum</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Reference -->
+          <section class="cv-card" id="references">
+            <h2 class="card-headline"><i class="fas fa-users"></i> References</h2>
+            <div class="ref-profile">
+              <span class="ref-name">Lê Thị Châu</span>
+              <span class="ref-position">Training Director</span>
+              <span class="ref-company">CodeGym Vietnam</span>
+              <div class="ref-contact">
+                <a href="tel:0966807709" class="ref-contact-link"><i class="fas fa-phone-alt"></i> 0966807709</a>
+                <a href="mailto:chau.le@codegym.vn" class="ref-contact-link"><i class="fas fa-envelope"></i> chau.le@codegym.vn</a>
+              </div>
+            </div>
+          </section>
+        </aside>
+
+        <!-- Main Column Content -->
+        <main class="cv-main">
+          <!-- Summary/Profile -->
+          <section class="cv-card main-section" id="profile-summary">
+            <h2 class="card-headline"><i class="fas fa-user"></i> Professional Profile</h2>
+            <p class="profile-paragraph">
+              Full-stack engineer with 8+ years of experience in web development, currently working as a **Java Web Instructor** at CodeGym Vietnam. Skilled in designing and building scalable systems with Java, Spring Boot, React, and React Native. Highly focused on mentorship, clean code principles, and modular system architecture.
+            </p>
+          </section>
+
+          <!-- Experience -->
+          <section class="cv-card main-section" id="professional-experience">
+            <h2 class="card-headline"><i class="fas fa-briefcase"></i> Professional Experience</h2>
+            <div class="timeline-container">
+              
+              <div class="timeline-block">
+                <div class="timeline-indicator"></div>
+                <div class="timeline-main">
+                  <div class="timeline-head">
+                    <h3 class="experience-title">Instructor – Java Web Developer Bootcamp</h3>
+                    <span class="duration-badge">05/2024 - Present</span>
+                  </div>
+                  <div class="experience-firm"><i class="far fa-building"></i> CodeGym Vietnam</div>
+                  <ul class="experience-bullets">
+                    <li>Full-time instructor training 200+ students in Java, Spring Boot, and modern web development principles.</li>
+                    <li>Mentoring students through complex, end-to-end curriculum projects and practical coding reviews.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="timeline-block">
+                <div class="timeline-indicator"></div>
+                <div class="timeline-main">
+                  <div class="timeline-head">
+                    <h3 class="experience-title">Full-Stack Developer</h3>
+                    <span class="duration-badge">03/2021 - 04/2025</span>
+                  </div>
+                  <div class="experience-firm"><i class="far fa-building"></i> BINH MINH INFORMATICS JOINT STOCK COMPANY</div>
+                  <ul class="experience-bullets">
+                    <li>Developed secure, high-scale government platforms using Spring Boot, Angular, and Oracle Database.</li>
+                    <li>Optimized legacy database architectures, resulting in faster querying and higher data security.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="timeline-block">
+                <div class="timeline-indicator"></div>
+                <div class="timeline-main">
+                  <div class="timeline-head">
+                    <h3 class="experience-title">Full-Stack Developer</h3>
+                    <span class="duration-badge">2015 - 2019</span>
+                  </div>
+                  <div class="experience-firm"><i class="far fa-building"></i> Manteiv Group</div>
+                  <ul class="experience-bullets">
+                    <li>Built engaging, SEO-optimized game portals and corporate landing pages.</li>
+                    <li>Improved core page load times and technical SEO practices, increasing organic search volume.</li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Projects -->
+          <section class="cv-card main-section" id="featured-projects">
+            <h2 class="card-headline"><i class="fas fa-project-diagram"></i> Featured Projects</h2>
+            <div class="projects-layout">
+              
+              <div class="project-card-item">
+                <div class="proj-header">
+                  <h3 class="proj-title">EAGENT Payment Platform</h3>
+                  <span class="proj-role-tag">Full-Stack</span>
+                </div>
+                <span class="proj-date">04/2023 - Present</span>
+                <p class="proj-desc">Integrated payment gateway solutions with top banks in Vietnam (MB Bank, BIDV) and VietQR dynamic codes, automating transaction confirmations.</p>
+              </div>
+
+              <div class="project-card-item">
+                <div class="proj-header">
+                  <h3 class="proj-title">anhnbt.com Blog</h3>
+                  <span class="proj-role-tag">Personal CMS</span>
+                </div>
+                <span class="proj-date">05/2016 - 2025</span>
+                <p class="proj-desc">Designed and deployed a highly custom content management system driving ~1 million page visits per month through optimization and clean layouts.</p>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Education -->
+          <section class="cv-card main-section" id="education-section">
+            <h2 class="card-headline"><i class="fas fa-graduation-cap"></i> Education</h2>
+            <div class="education-layout">
+              <div class="edu-card-item">
+                <div class="edu-info">
+                  <h3 class="edu-title">Software Engineering</h3>
+                  <span class="edu-school">Hanoi-Aptech</span>
+                </div>
+                <span class="duration-badge bg-secondary">2013 - 2025</span>
+              </div>
+
+              <div class="edu-card-item">
+                <div class="edu-info">
+                  <h3 class="edu-title">Full-Stack Java Web Developer</h3>
+                  <span class="edu-school">CodeGym Vietnam</span>
+                </div>
+                <span class="duration-badge bg-secondary">07/2020 - 02/2021</span>
+              </div>
+            </div>
+          </section>
+        </main>
       </div>
-    </header>
-
-    <!-- Two Column Layout -->
-    <div class="two-column-layout">
-      <!-- Left Column -->
-      <aside class="left-column">
-        <!-- Profile Section -->
-        <section class="section profile">
-          <h2 class="section-title">
-            <i class="fas fa-user-circle"></i>
-            Profile
-          </h2>
-          <p class="profile-text">
-            Full-stack engineer with 8+ years of experience in web development, currently Java Web Instructor at CodeGym
-            Vietnam.
-            Skilled in building scalable systems with Java, Spring Boot, React, and React Native. Strong focus on
-            mentoring juniors and system architecture.
-          </p>
-        </section>
-
-        <!-- Skills Section -->
-        <section class="section skills">
-          <h2 class="section-title">
-            <i class="fas fa-code"></i>
-            Key Skills
-          </h2>
-          <div class="skills-grid">
-            <div class="skill-category">
-              <h3 class="skill-category-title">
-                <i class="fas fa-server"></i>
-                Backend
-              </h3>
-              <div class="skill-tags">
-                <span class="skill-tag"><i class="fab fa-java"></i>Java</span>
-                <span class="skill-tag"><i class="fas fa-leaf"></i>Spring Boot</span>
-                <span class="skill-tag"><i class="fas fa-leaf"></i>Spring MVC</span>
-                <span class="skill-tag"><i class="fas fa-exchange-alt"></i>REST API</span>
-                <span class="skill-tag"><i class="fas fa-cubes"></i>Microservices</span>
-                <span class="skill-tag"><i class="fas fa-key"></i>JWT</span>
-              </div>
-            </div>
-
-            <div class="skill-category">
-              <h3 class="skill-category-title">
-                <i class="fas fa-desktop"></i>
-                Frontend
-              </h3>
-              <div class="skill-tags">
-                <span class="skill-tag"><i class="fab fa-react"></i>ReactJS</span>
-                <span class="skill-tag"><i class="fab fa-angular"></i>Angular</span>
-                <span class="skill-tag"><i class="fab fa-react"></i>React Native</span>
-                <span class="skill-tag"><i class="fab fa-html5"></i>HTML/CSS</span>
-                <span class="skill-tag"><i class="fab fa-js-square"></i>JavaScript</span>
-                <span class="skill-tag"><i class="fas fa-code"></i>TypeScript</span>
-              </div>
-            </div>
-
-            <div class="skill-category">
-              <h3 class="skill-category-title">
-                <i class="fas fa-database"></i>
-                Database
-              </h3>
-              <div class="skill-tags">
-                <span class="skill-tag"><i class="fas fa-database"></i>MySQL</span>
-                <span class="skill-tag"><i class="fas fa-elephant"></i>PostgreSQL</span>
-                <span class="skill-tag"><i class="fab fa-microsoft"></i>SQL Server</span>
-                <span class="skill-tag"><i class="fas fa-database"></i>Oracle Database</span>
-              </div>
-            </div>
-
-            <div class="skill-category">
-              <h3 class="skill-category-title">
-                <i class="fas fa-cloud"></i>
-                DevOps
-              </h3>
-              <div class="skill-tags">
-                <span class="skill-tag"><i class="fab fa-docker"></i>Docker</span>
-                <span class="skill-tag"><i class="fas fa-server"></i>Nginx</span>
-                <span class="skill-tag"><i class="fas fa-server"></i>Apache Tomcat</span>
-                <span class="skill-tag"><i class="fab fa-linux"></i>Ubuntu/CentOS</span>
-                <span class="skill-tag"><i class="fab fa-windows"></i>Windows Server</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-
-
-        <!-- Reference Section -->
-        <section class="section reference">
-          <h2 class="section-title">
-            <i class="fas fa-address-book"></i>
-            Reference
-          </h2>
-          <div class="reference-item">
-            <h3 class="reference-name">Lê Thị Châu</h3>
-            <p class="reference-title">Training Director, CodeGym Vietnam</p>
-            <div class="reference-contact">
-              <div class="contact-item">
-                <i class="fas fa-phone"></i>
-                <a href="tel:0966807709">0966807709</a>
-              </div>
-              <div class="contact-item">
-                <i class="fas fa-envelope"></i>
-                <a href="mailto:chau.le@codegym.vn">chau.le@codegym.vn</a>
-              </div>
-            </div>
-          </div>
-        </section>
-      </aside>
-
-      <!-- Right Column -->
-      <main class="right-column">
-        <!-- Experience Section -->
-        <section class="section experience">
-          <h2 class="section-title">
-            <i class="fas fa-briefcase"></i>
-            Experience
-          </h2>
-          <div class="experience-list">
-            <div class="experience-item">
-              <h3 class="job-title">JS Instructor</h3>
-              <div class="company">
-                <i class="fas fa-building"></i>
-                CodeGym Vietnam
-              </div>
-              <span class="duration">02/2021 – Present</span>
-              <ul class="job-description">
-                <li>Teaching JavaScript fundamentals and advanced concepts to students</li>
-                <li>Developing curriculum and course materials for web development</li>
-                <li>Mentoring students through hands-on projects and assignments</li>
-                <li>Conducting code reviews and providing technical guidance</li>
-              </ul>
-            </div>
-
-            <div class="experience-item">
-              <h3 class="job-title">Full Stack Developer</h3>
-              <div class="company">
-                <i class="fas fa-building"></i>
-                SkyLine Tech Solutions
-              </div>
-              <span class="duration">08/2019 – 01/2021</span>
-              <ul class="job-description">
-                <li>Developed responsive web applications using React.js and Node.js</li>
-                <li>Collaborated with design teams to implement user-friendly interfaces</li>
-                <li>Optimized database queries and improved application performance</li>
-                <li>Participated in agile development processes and sprint planning</li>
-              </ul>
-            </div>
-
-            <div class="experience-item">
-              <h3 class="job-title">Junior Java Developer</h3>
-              <div class="company">
-                <i class="fas fa-building"></i>
-                TechViet Solutions
-              </div>
-              <span class="duration">03/2018 – 07/2019</span>
-              <ul class="job-description">
-                <li>Developed enterprise web applications using Spring Framework</li>
-                <li>Maintained and updated existing Java-based systems</li>
-                <li>Wrote unit tests and participated in code review processes</li>
-                <li>Worked closely with senior developers to learn best practices</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <!-- Freelance Projects Section -->
-        </section>
-
-        <!-- Education Section -->
-        <section class="section education">
-          <h2 class="section-title">
-            <i class="fas fa-graduation-cap"></i>
-            Education
-          </h2>
-          <div class="education-list">
-            <div class="education-item">
-              <h3 class="degree">Software Engineering</h3>
-              <div class="institution">
-                <i class="fas fa-university"></i>
-                Hanoi-Aptech
-              </div>
-              <span class="duration">2013 – 2025</span>
-            </div>
-
-            <div class="education-item">
-              <h3 class="degree">Full-Stack Java Web Developer</h3>
-              <div class="institution">
-                <i class="fas fa-university"></i>
-                CodeGym Vietnam
-              </div>
-              <span class="duration">07/2020 – 02/2021</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section class="section projects">
-          <h2 class="section-title">
-            <i class="fas fa-project-diagram"></i>
-            Featured Projects
-          </h2>
-          <div class="projects-list">
-            <div class="project-item">
-              <div class="project-header">
-                <h3 class="project-title">EAGENT Payment Platform</h3>
-                <span class="project-duration">04/2023 – Present</span>
-              </div>
-              <div class="project-role">
-                <i class="fas fa-user-tag"></i>
-                Full-stack Developer
-              </div>
-              <p class="project-description">
-                Payment integration with MB Bank, BIDV, VietQR
-              </p>
-            </div>
-
-            <div class="project-item">
-              <div class="project-header">
-                <h3 class="project-title">anhnBt.com Blog</h3>
-                <span class="project-duration">05/2016 – 2025</span>
-              </div>
-              <div class="project-role">
-                <i class="fas fa-user-tag"></i>
-                Personal CMS Project
-              </div>
-              <p class="project-description">
-                Personal blog with ~1M visits/month
-              </p>
-            </div>
-          </div>
-        </section>
-
-
-
-        <!-- Education Section -->
-        <section class="section freelance-projects">
-          <div class="container-fluid">
-            <h2 class="section-title text-center mb-5">
-              <i class="fas fa-laptop-code"></i>
-              Freelance Projects
-            </h2>
-            <div class="owl-carousel projects-carousel">
-              <div class="item">
-                <div class="project-card card h-100 shadow-sm">
-                  <div class="project-thumbnail">
-                    <img
-                      src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      class="card-img-top" alt="E-commerce Website" loading="lazy">
-                    <div class="project-overlay">
-                      <div class="project-links">
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fas fa-external-link-alt"></i> Live Demo
-                        </a>
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fab fa-github"></i> GitHub
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h3 class="project-title card-title h5">E-commerce Website</h3>
-                    <div class="project-tech mb-3">
-                      <span class="tech-tag badge"><i class="fab fa-react"></i> ReactJS</span>
-                      <span class="tech-tag badge"><i class="fab fa-node-js"></i> Node.js</span>
-                      <span class="tech-tag badge"><i class="fas fa-database"></i> MongoDB</span>
-                    </div>
-                    <p class="project-desc card-text flex-grow-1">Full-stack e-commerce platform with payment
-                      integration, user authentication, and admin dashboard.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <div class="project-card card h-100 shadow-sm">
-                  <div class="project-thumbnail">
-                    <img
-                      src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      class="card-img-top" alt="Learning Management System" loading="lazy">
-                    <div class="project-overlay">
-                      <div class="project-links">
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fas fa-external-link-alt"></i> Live Demo
-                        </a>
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fab fa-github"></i> GitHub
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h3 class="project-title card-title h5">Learning Management System</h3>
-                    <div class="project-tech mb-3">
-                      <span class="tech-tag badge"><i class="fab fa-java"></i> Spring Boot</span>
-                      <span class="tech-tag badge"><i class="fab fa-angular"></i> Angular</span>
-                      <span class="tech-tag badge"><i class="fas fa-database"></i> PostgreSQL</span>
-                    </div>
-                    <p class="project-desc card-text flex-grow-1">Educational platform for online courses with video
-                      streaming, assignments, and progress tracking.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <div class="project-card card h-100 shadow-sm">
-                  <div class="project-thumbnail">
-                    <img
-                      src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      class="card-img-top" alt="Task Management App" loading="lazy">
-                    <div class="project-overlay">
-                      <div class="project-links">
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fas fa-external-link-alt"></i> Live Demo
-                        </a>
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fab fa-github"></i> GitHub
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h3 class="project-title card-title h5">Task Management App</h3>
-                    <div class="project-tech mb-3">
-                      <span class="tech-tag badge"><i class="fab fa-vuejs"></i> Vue.js</span>
-                      <span class="tech-tag badge"><i class="fab fa-laravel"></i> Laravel</span>
-                      <span class="tech-tag badge"><i class="fas fa-database"></i> MySQL</span>
-                    </div>
-                    <p class="project-desc card-text flex-grow-1">Collaborative task management tool with real-time
-                      updates, team collaboration features, and reporting.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <div class="project-card card h-100 shadow-sm">
-                  <div class="project-thumbnail">
-                    <img
-                      src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      class="card-img-top" alt="Restaurant Booking System" loading="lazy">
-                    <div class="project-overlay">
-                      <div class="project-links">
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fas fa-external-link-alt"></i> Live Demo
-                        </a>
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fab fa-github"></i> GitHub
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h3 class="project-title card-title h5">Restaurant Booking System</h3>
-                    <div class="project-tech mb-3">
-                      <span class="tech-tag badge"><i class="fab fa-react"></i> Next.js</span>
-                      <span class="tech-tag badge"><i class="fab fa-node-js"></i> Express</span>
-                      <span class="tech-tag badge"><i class="fas fa-database"></i> Firebase</span>
-                    </div>
-                    <p class="project-desc card-text flex-grow-1">Online reservation system with table management,
-                      customer notifications, and payment processing.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <div class="project-card card h-100 shadow-sm">
-                  <div class="project-thumbnail">
-                    <img
-                      src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      class="card-img-top" alt="Portfolio Website Generator" loading="lazy">
-                    <div class="project-overlay">
-                      <div class="project-links">
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fas fa-external-link-alt"></i> Live Demo
-                        </a>
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fab fa-github"></i> GitHub
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h3 class="project-title card-title h5">Portfolio Website Generator</h3>
-                    <div class="project-tech mb-3">
-                      <span class="tech-tag badge"><i class="fab fa-react"></i> React</span>
-                      <span class="tech-tag badge"><i class="fab fa-sass"></i> SCSS</span>
-                      <span class="tech-tag badge"><i class="fab fa-github"></i> GitHub API</span>
-                    </div>
-                    <p class="project-desc card-text flex-grow-1">Dynamic portfolio generator that pulls data from
-                      GitHub repos and creates responsive websites.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <div class="project-card card h-100 shadow-sm">
-                  <div class="project-thumbnail">
-                    <img
-                      src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      class="card-img-top" alt="Mobile Expense Tracker" loading="lazy">
-                    <div class="project-overlay">
-                      <div class="project-links">
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fas fa-external-link-alt"></i> App Store
-                        </a>
-                        <a href="#" class="btn btn-outline-light btn-sm project-link">
-                          <i class="fab fa-github"></i> GitHub
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h3 class="project-title card-title h5">Expense Tracker Mobile App</h3>
-                    <div class="project-tech mb-3">
-                      <span class="tech-tag badge"><i class="fab fa-react"></i> React Native</span>
-                      <span class="tech-tag badge"><i class="fas fa-mobile-alt"></i> Expo</span>
-                      <span class="tech-tag badge"><i class="fas fa-database"></i> SQLite</span>
-                    </div>
-                    <p class="project-desc card-text flex-grow-1">Mobile expense tracking app with categories, budgets,
-                      and financial insights visualization.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <!-- Footer -->
-      <footer class="footer">
-        <p>&copy; 2025 Nguyễn Bá Tuấn Anh. All rights reserved.</p>
-        <p>Built with ❤️ using HTML, CSS & JavaScript</p>
-      </footer>
     </div>
 
-    <!-- jQuery (required for Owl Carousel) -->
-    <script src="js/jquery-3.7.1.min.js"></script>
+    <!-- 2. JAVA CODE VIEW (IDE Layout) -->
+    <div id="code-layout" class="cv-layout">
+      <div class="ide-frame">
+        <div class="ide-bar">
+          <div class="ide-controls">
+            <span class="mac-dot red"></span>
+            <span class="mac-dot yellow"></span>
+            <span class="mac-dot green"></span>
+          </div>
+          <div class="ide-tab">
+            <i class="fab fa-java java-icon"></i> NguyenBaTuanAnh.java
+          </div>
+          <div class="ide-actions">
+            <span class="run-text"><i class="fas fa-play"></i> Run Class</span>
+          </div>
+        </div>
+        <div class="ide-content">
+          <pre class="code-viewport"><code><span class="line-num">1</span><span class="keyword">package</span> <span class="package-name">cv.anhnbt</span>;
+<span class="line-num">2</span>
+<span class="line-num">3</span><span class="keyword">import</span> <span class="import-name">java.time.LocalDate</span>;
+<span class="line-num">4</span><span class="keyword">import</span> <span class="import-name">java.util.List</span>;
+<span class="line-num">5</span><span class="keyword">import</span> <span class="import-name">java.util.Map</span>;
+<span class="line-num">6</span>
+<span class="line-num">7</span><span class="comment">/**</span>
+<span class="line-num">8</span><span class="comment"> * Nguyễn Bá Tuấn Anh - Java Web Developer Full-Stack</span>
+<span class="line-num">9</span><span class="comment"> * </span>
+<span class="line-num">10</span><span class="comment"> * Full-stack engineer with 8+ years of experience in web development,</span>
+<span class="line-num">11</span><span class="comment"> * currently Java Web Instructor at CodeGym Vietnam.</span>
+<span class="line-num">12</span><span class="comment"> */</span>
+<span class="line-num">13</span><span class="annotation">@Builder</span>
+<span class="line-num">14</span><span class="keyword">public class</span> <span class="class-name">NguyenBaTuanAnh</span> <span class="keyword">implements</span> <span class="interface-name">FullStackDeveloper</span> {
+<span class="line-num">15</span>    
+<span class="line-num">16</span>    <span class="keyword">public static final</span> <span class="type-name">String</span> <span class="constant-name">EMAIL</span> = <span class="string">"anhnbt.it@gmail.com"</span>;
+<span class="line-num">17</span>    <span class="keyword">public static final</span> <span class="type-name">String</span> <span class="constant-name">PHONE</span> = <span class="string">"0349876595"</span>;
+<span class="line-num">18</span>    <span class="keyword">public static final</span> <span class="type-name">String</span> <span class="constant-name">GITHUB</span> = <span class="string">"https://github.com/anhnbt"</span>;
+<span class="line-num">19</span>    <span class="keyword">public static final</span> <span class="type-name">String</span> <span class="constant-name">LOCATION</span> = <span class="string">"Phường Hoàng Liệt, TP Hà Nội"</span>;
+<span class="line-num">20</span>
+<span class="line-num">21</span>    <span class="keyword">public</span> <span class="type-name">Map</span>&lt;<span class="type-name">String</span>, <span class="type-name">List</span>&lt;<span class="type-name">String</span>&gt;&gt; <span class="method-name">getSkills</span>() {
+<span class="line-num">22</span>        <span class="keyword">return</span> <span class="type-name">Map</span>.of(
+<span class="line-num">23</span>            <span class="string">"Backend"</span>, <span class="type-name">List</span>.of(<span class="string">"Java"</span>, <span class="string">"Spring Boot"</span>, <span class="string">"Spring MVC"</span>, <span class="string">"REST API"</span>, <span class="string">"Microservices"</span>, <span class="string">"JWT"</span>),
+<span class="line-num">24</span>            <span class="string">"Frontend"</span>, <span class="type-name">List</span>.of(<span class="string">"ReactJS"</span>, <span class="string">"Angular"</span>, <span class="string">"React Native (Expo)"</span>, <span class="string">"HTML"</span>, <span class="string">"CSS"</span>, <span class="string">"JavaScript"</span>, <span class="string">"TypeScript"</span>),
+<span class="line-num">25</span>            <span class="string">"Database"</span>, <span class="type-name">List</span>.of(<span class="string">"MySQL"</span>, <span class="string">"PostgreSQL"</span>, <span class="string">"SQL Server"</span>, <span class="string">"Oracle Database"</span>),
+<span class="line-num">26</span>            <span class="string">"DevOps"</span>, <span class="type-name">List</span>.of(<span class="string">"Docker"</span>, <span class="string">"Nginx"</span>, <span class="string">"Apache Tomcat"</span>, <span class="string">"Ubuntu/CentOS"</span>, <span class="string">"Windows Server"</span>),
+<span class="line-num">27</span>            <span class="string">"Other"</span>, <span class="type-name">List</span>.of(<span class="string">"Git"</span>, <span class="string">"Agile Scrum"</span>)
+<span class="line-num">28</span>        );
+<span class="line-num">29</span>    }
+<span class="line-num">30</span>
+<span class="line-num">31</span>    <span class="keyword">public</span> <span class="type-name">List</span>&lt;<span class="type-name">Experience</span>&gt; <span class="method-name">getProfessionalExperience</span>() {
+<span class="line-num">32</span>        <span class="keyword">return</span> <span class="type-name">List</span>.of(
+<span class="line-num">33</span>            <span class="keyword">new</span> <span class="type-name">Experience</span>(
+<span class="line-num">34</span>                <span class="string">"CodeGym Vietnam"</span>,
+<span class="line-num">35</span>                <span class="string">"Instructor – Java Web Developer Bootcamp"</span>,
+<span class="line-num">36</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2024</span>, <span class="number">5</span>, <span class="number">1</span>),
+<span class="line-num">37</span>                <span class="type-name">LocalDate</span>.now(),
+<span class="line-num">38</span>                <span class="string">"Full-time instructor training 200+ students in Java, Spring Boot, and web development."</span>
+<span class="line-num">39</span>            ),
+<span class="line-num">40</span>            <span class="keyword">new</span> <span class="type-name">Experience</span>(
+<span class="line-num">41</span>                <span class="string">"BINH MINH INFORMATICS JOINT STOCK COMPANY"</span>,
+<span class="line-num">42</span>                <span class="string">"FULL-STACK DEVELOPER"</span>,
+<span class="line-num">43</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2021</span>, <span class="number">3</span>, <span class="number">1</span>),
+<span class="line-num">44</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2025</span>, <span class="number">4</span>, <span class="number">30</span>),
+<span class="line-num">45</span>                <span class="string">"Developed government platforms with Spring Boot, Angular, Oracle DB."</span>
+<span class="line-num">46</span>            ),
+<span class="line-num">47</span>            <span class="keyword">new</span> <span class="type-name">Experience</span>(
+<span class="line-num">48</span>                <span class="string">"Manteiv Group"</span>,
+<span class="line-num">49</span>                <span class="string">"FULL-STACK DEVELOPER"</span>,
+<span class="line-num">50</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2015</span>, <span class="number">1</span>, <span class="number">1</span>),
+<span class="line-num">51</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2019</span>, <span class="number">12</span>, <span class="number">31</span>),
+<span class="line-num">52</span>                <span class="string">"Built game portals and landing pages with SEO optimization."</span>
+<span class="line-num">53</span>            )
+<span class="line-num">54</span>        );
+<span class="line-num">55</span>    }
+<span class="line-num">56</span>
+<span class="line-num">57</span>    <span class="keyword">public</span> <span class="type-name">List</span>&lt;<span class="type-name">Education</span>&gt; <span class="method-name">getEducation</span>() {
+<span class="line-num">58</span>        <span class="keyword">return</span> <span class="type-name">List</span>.of(
+<span class="line-num">59</span>            <span class="keyword">new</span> <span class="type-name">Education</span>(<span class="string">"Hanoi-Aptech"</span>, <span class="string">"SOFTWARE ENGINEERING"</span>, <span class="number">2013</span>, <span class="number">2025</span>),
+<span class="line-num">60</span>            <span class="keyword">new</span> <span class="type-name">Education</span>(<span class="string">"CodeGym Vietnam"</span>, <span class="string">"FULL-STACK JAVA WEB DEVELOPER"</span>, <span class="number">2020</span>, <span class="number">2021</span>)
+<span class="line-num">61</span>        );
+<span class="line-num">62</span>    }
+<span class="line-num">63</span>
+<span class="line-num">64</span>    <span class="keyword">public</span> <span class="type-name">List</span>&lt;<span class="type-name">Project</span>&gt; <span class="method-name">getFeaturedProjects</span>() {
+<span class="line-num">65</span>        <span class="keyword">return</span> <span class="type-name">List</span>.of(
+<span class="line-num">66</span>            <span class="keyword">new</span> <span class="type-name">Project</span>(
+<span class="line-num">67</span>                <span class="string">"EAGENT PAYMENT PLATFORM"</span>,
+<span class="line-num">68</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2023</span>, <span class="number">4</span>, <span class="number">1</span>),
+<span class="line-num">69</span>                <span class="type-name">LocalDate</span>.now(),
+<span class="line-num">70</span>                <span class="string">"Payment integration with MB Bank, BIDV, VietQR"</span>
+<span class="line-num">71</span>            ),
+<span class="line-num">72</span>            <span class="keyword">new</span> <span class="type-name">Project</span>(
+<span class="line-num">73</span>                <span class="string">"ANHNBT.COM BLOG"</span>,
+<span class="line-num">74</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2016</span>, <span class="number">5</span>, <span class="number">1</span>),
+<span class="line-num">75</span>                <span class="type-name">LocalDate</span>.of(<span class="number">2025</span>, <span class="number">12</span>, <span class="number">31</span>),
+<span class="line-num">76</span>                <span class="string">"Personal CMS project, ~1M visits/month"</span>
+<span class="line-num">77</span>            )
+<span class="line-num">78</span>        );
+<span class="line-num">79</span>    }
+<span class="line-num">80</span>}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <footer class="cv-footer">
+    <p>&copy; 2026 Nguyễn Bá Tuấn Anh. Built with custom pure CSS for responsive presentation and lightweight structure.</p>
+  </footer>
 
-    <!-- Owl Carousel JS -->
-    <script src="js/owl.carousel.min.js"></script>
-
-    <!-- WOW.js -->
-    <script src="js/wow.min.js"></script>
-
-    <!-- Custom Scripts -->
-    <script src="script.js"></script>
+  <!-- Link script.js -->
+  <script src="script.js"></script>
 </body>
 
 </html>

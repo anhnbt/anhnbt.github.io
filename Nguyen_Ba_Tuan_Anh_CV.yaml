@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/rendercv/rendercv/refs/tags/v2.8/schema.json
+cv:
+  name: Nguyễn Bá Tuấn Anh
+  headline: Java Web Developer Full-Stack
+  location: Phường Hoàng Liệt, TP Hà Nội
+  email: anhnbt.it@gmail.com
+  phone: "+84 349 876 595"
+  social_networks:
+    - network: GitHub
+      username: anhnbt
+  sections:
+    summary:
+      - Full-stack engineer with 8+ years of experience in web development, currently Java Web Instructor at CodeGym Vietnam. Skilled in building scalable systems with Java, Spring Boot, React, and React Native. Strong focus on mentoring juniors, system architecture.
+    experience:
+      - company: CodeGym Vietnam
+        position: Instructor – Java Web Developer Bootcamp
+        start_date: 2024-05
+        end_date: present
+        location: Hà Nội, Vietnam
+        highlights:
+          - Full-time instructor training 200+ students in Java, Spring Boot, and web development.
+      - company: BINH MINH INFORMATICS JOINT STOCK COMPANY
+        position: Full-Stack Developer
+        start_date: 2021-03
+        end_date: 2025-04
+        location: Hà Nội, Vietnam
+        highlights:
+          - Developed government platforms with Spring Boot, Angular, Oracle DB.
+      - company: Manteiv Group
+        position: Full-Stack Developer
+        start_date: 2015
+        end_date: 2019
+        location: Hà Nội, Vietnam
+        highlights:
+          - Built game portals and landing pages with SEO optimization.
+    education:
+      - institution: Hanoi-Aptech
+        area: Software Engineering
+        start_date: 2013
+        end_date: 2025
+        location: Hà Nội, Vietnam
+      - institution: CodeGym Vietnam
+        area: Full-Stack Java Web Developer
+        start_date: 2020-07
+        end_date: 2021-02
+        location: Hà Nội, Vietnam
+    projects:
+      - name: EAGENT PAYMENT PLATFORM
+        start_date: 2023-04
+        end_date: present
+        summary: Full-stack
+        highlights:
+          - Payment integration with MB Bank, BIDV, VietQR
+      - name: ANHNBT.COM BLOG
+        start_date: 2016-05
+        end_date: 2025
+        summary: Personal CMS project
+        highlights:
+          - Personal blog with ~1M visits/month
+    skills:
+      - label: Backend
+        details: Java, Spring Boot, Spring MVC, REST API, Microservices, JWT
+      - label: Frontend
+        details: ReactJS, Angular, React Native (Expo), HTML, CSS, JavaScript, TypeScript
+      - label: Database
+        details: MySQL, PostgreSQL, SQL Server, Oracle Database
+      - label: DevOps
+        details: Docker, Nginx, Apache Tomcat, Ubuntu/CentOS, Windows Server
+      - label: Other
+        details: Git, Agile Scrum
+    references:
+      - "**Le Thi Chau** - Training Director, CodeGym Vietnam (Phone: 0966807709, Email: chau.le@codegym.vn)"
+
+design:
+  theme: sb2nov
+  page:
+    size: a4
+    top_margin: 2cm
+    bottom_margin: 2cm
+    left_margin: 2cm
+    right_margin: 2cm

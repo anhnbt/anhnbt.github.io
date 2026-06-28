@@ -1,0 +1,246 @@
+---
+title: Tôi xây dựng Second Brain bằng LLM như thế nào — Ghi chú cá nhân
+date: 2026-06-28
+description: Ghi chú cá nhân về quá trình thiết kế một hệ thống quản lý tri thức dài hạn kết hợp Obsidian và LLM. Không phải RAG. Không phải chatbot. Là một wiki được LLM viết và duy trì thay bạn.
+slug: xay-dung-second-brain-voi-llm
+tags:
+  - second-brain
+  - pkm
+  - llm
+  - obsidian
+  - productivity
+  - knowledge-management
+---
+
+Bài này tôi viết để ghi lại quá trình tự mình setup hệ thống, phần lớn để sau này nhìn lại xem mình đã làm gì, tại sao, và nó có hoạt động không.
+
+---
+
+## Vấn đề tôi đang gặp phải
+
+Sau hơn 8 năm làm phần mềm, tôi nhận ra mình đang bị **rò rỉ kiến thức** theo cách rất khó thấy.
+
+Mỗi lần debug xong một production incident, tôi biết thêm một thứ gì đó về hệ thống — về cách Spring connection pool hoạt động dưới áp lực, về cách NAPAS thay đổi timeout mà không báo trước, về cách Nginx xử lý keep-alive khi phía sau là Tomcat. Những thứ này đến rồi đi. Tôi giải quyết xong, commit code, đóng ticket, và một tháng sau khi gặp lại triệu chứng tương tự, tôi phải debug lại từ đầu.
+
+Tôi cũng dạy lập trình. Mỗi lần giải thích một concept cho học viên, tôi hiểu nó sâu hơn. Nhưng những lời giải thích đó không đi đâu cả — chúng bốc hơi sau buổi học.
+
+Tôi đã thử nhiều thứ: Notion, Obsidian, sticky notes, Evernote. Vấn đề không phải công cụ. Vấn đề là **chi phí bảo trì**. Mỗi hệ thống ghi chú đều có một kẻ thù chung: sau vài tháng, bạn không còn muốn cập nhật nó nữa vì cập nhật mất quá nhiều công. Bạn phải nhớ cái gì liên quan đến cái gì, phải tìm đúng chỗ để paste, phải cập nhật cross-reference. Con người không giỏi những việc này.
+
+---
+
+## LLM Wiki — Ý tưởng khác với RAG
+
+Hầu hết người dùng LLM với tài liệu đang làm theo mô hình RAG: upload file, LLM tìm chunk liên quan, trả lời câu hỏi. Mỗi lần hỏi là mỗi lần LLM phát hiện lại kiến thức từ đầu. Không có gì được tích lũy.
+
+Cái tôi đang thử khác ở chỗ: **LLM viết và duy trì một wiki**. Không phải retrieval — là compilation.
+
+Khi tôi thêm một tài liệu nguồn (incident report, bài viết, design doc), LLM đọc, trích xuất entity và concept, tạo hoặc cập nhật các trang wiki, ghi chú cross-reference, và đánh dấu mâu thuẫn với nội dung cũ. Tri thức được tích hợp một lần và được giữ hiện tại — không phải tái phát hiện mỗi lần hỏi.
+
+Cấu trúc gồm ba tầng:
+
+- **`raw/`** — Tài liệu nguồn gốc. Bất biến. LLM đọc nhưng không ghi.
+- **`wiki/`** — Trang wiki do LLM tạo và duy trì. Tóm tắt, entity pages, concept pages, synthesis.
+- **`CLAUDE.md`** — Schema mô tả cách vault hoạt động, quy tắc, context về bản thân. LLM đọc file này trước mọi thao tác.
+
+Triết lý: *LLM là lập trình viên, wiki là codebase, Obsidian là IDE.*
+
+---
+
+## Cấu trúc vault tôi đang dùng
+
+```
+my-second-brain/
+├── raw/                    ← Tài liệu nguồn — KHÔNG BAO GIỜ sửa
+├── wiki/
+│   ├── index.md            ← Danh mục toàn bộ tri thức
+│   ├── log.md              ← Lịch sử mọi thay đổi
+│   ├── entities/           ← Trang cho hệ thống, tổ chức, con người
+│   ├── concepts/           ← Trang cho ý tưởng, pattern, quy trình
+│   ├── sources/            ← Tóm tắt mỗi file nguồn đã ingest
+│   ├── synthesis/          ← Trang tổng hợp nhiều nguồn
+│   └── decisions/          ← ADR — các quyết định kiến trúc
+├── daily/                  ← Ghi chú hàng ngày (scratch pad, không cần đẹp)
+├── assets/
+├── templates/
+│   └── daily.md            ← Template tạo file daily mới
+└── .claude/
+    ├── CLAUDE.md           ← Schema + context về tôi
+    └── commands/
+        ├── ingest.md       ← /ingest
+        ├── query.md        ← /query
+        ├── lint.md         ← /lint
+        └── synthesize.md   ← /synthesize
+```
+
+---
+
+## Bốn thao tác cốt lõi
+
+### `/ingest` — Thêm tài liệu mới
+
+Đây là thao tác tôi dùng nhiều nhất. Tôi thả một file vào `raw/` — có thể là incident report, bài blog hay, ghi chú cuộc họp, chương sách — rồi chạy:
+
+```
+/ingest tên-file.md
+```
+
+LLM sẽ:
+1. Đọc toàn bộ file
+2. Tóm tắt những gì nó tìm thấy và hỏi tôi xác nhận trước khi ghi
+3. Tạo hoặc cập nhật các trang wiki liên quan
+4. Tạo trang tóm tắt nguồn trong `wiki/sources/`
+5. Cập nhật `wiki/index.md` và `wiki/log.md`
+
+Điểm quan trọng: LLM hỏi xác nhận trước khi ghi. Đây là lúc tôi có thể sửa nếu nó hiểu sai, hoặc thêm context mà file nguồn không có. Sau đó tôi không cần làm gì nữa — tất cả cross-reference, citation, cập nhật index đều tự động.
+
+### `/query` — Hỏi về kiến thức trong vault
+
+```
+/query Tại sao connection pool bị cạn kiệt mà không alert sớm?
+```
+
+LLM trả lời dựa trên nội dung wiki, cite nguồn cụ thể, và nói thẳng nếu vault chưa có thông tin. Nếu câu trả lời tốt và capture được insight chưa có trang nào, LLM sẽ hỏi có muốn lưu thành trang mới không.
+
+### `/synthesize` — Tổng hợp nhiều trang
+
+Khi tích đủ 3-5 trang về một chủ đề:
+
+```
+/synthesize "Production debugging patterns trong Java/Spring"
+```
+
+LLM đọc tất cả trang liên quan, tìm pattern chung, mâu thuẫn, khoảng trống kiến thức, và viết một trang tổng hợp. Đây là lúc tri thức thực sự bắt đầu compound — cái nhìn toàn cảnh không tồn tại trong bất kỳ trang đơn lẻ nào.
+
+### `/lint` — Kiểm tra sức khỏe vault
+
+Chạy mỗi tháng một lần:
+
+```
+/lint
+```
+
+LLM scan và báo cáo: broken wikilinks, trang không ai trỏ đến, trang thiếu citation, nội dung cũ hơn 6 tháng có thể stale. Nó chỉ báo cáo, không tự sửa — tôi quyết định làm gì tiếp.
+
+---
+
+## Ghi chú hàng ngày — `daily/`
+
+Đây là thứ tôi thiếu trong thiết kế ban đầu và phải thêm vào sau.
+
+Không phải mọi insight đều đến từ tài liệu có sẵn. Nhiều thứ quan trọng nhất xuất hiện giữa chừng trong ngày — khi đang debug, khi giải thích cho đồng nghiệp, khi đọc một đoạn code cũ và nhận ra tại sao nó được viết như vậy. Những lúc đó không có thời gian dừng lại để tạo file source và chạy `/ingest`.
+
+`daily/` giải quyết bài toán này. Mỗi ngày tôi tạo một file `YYYY-MM-DD.md` từ template và ghi ngắn gọn:
+
+```markdown
+## Làm hôm nay
+- Fix timeout issue trên payment service, liên quan đến NAPAS policy thay đổi
+
+## Vấn đề gặp phải
+- Connection pool bị cạn kiệt âm thầm, không có alert. Cần tìm hiểu thêm.
+
+## Insight / Bài học
+- Rolling restart Tomcat nhanh hơn redeploy full trong trường hợp khẩn
+
+## Câu hỏi chưa trả lời được
+- Resilience4j circuit breaker có hoạt động tốt với RestTemplate không?
+
+## Đáng ingest vào wiki?
+[x] Có — incident report chi tiết hơn cần viết riêng
+```
+
+Không cần viết đẹp. Không cần đầy đủ. Đây là scratch pad — viết cho chính mình đọc lại cuối tuần.
+
+**Cuối tuần**, tôi đọc lại các file `daily/` trong tuần. File nào có checkbox được đánh dấu thì hoặc viết thành file source đầy đủ rồi `/ingest`, hoặc paste thẳng vào `raw/` nếu đủ ngắn. Phần còn lại để nguyên trong `daily/` — không cần làm gì thêm.
+
+Điều quan trọng: **không ingest tất cả daily notes**. Ingest chọn lọc — chỉ những gì có entity cụ thể, insight có thể tái dùng, hoặc bài học từ sự cố thực tế. Ghi chú kiểu "hôm nay fix xong bug X" không cần vào wiki.
+
+---
+
+## CLAUDE.md — Trái tim của hệ thống
+
+File quan trọng nhất không phải trang wiki nào đó, mà là `CLAUDE.md`. LLM đọc file này trước mọi thao tác.
+
+Nó chứa:
+
+- **Triết lý vault** — Viết cho 10 năm. Ưu tiên cập nhật trang cũ hơn tạo trang mới. Không xóa thông tin.
+- **Quy tắc cứng** — `raw/` bất biến. Mọi thay đổi phải ghi vào `log.md`. Mọi claim phải có citation.
+- **Context về tôi** — Stack công nghệ, domain hiện tại (điện lực, EVN, HĐĐT), triết lý làm việc, mục tiêu dài hạn.
+- **Glossary domain** — LLM cần biết HĐĐT là gì, CMIS là gì, tại sao Oracle Database trong môi trường enterprise lại có ràng buộc đặc biệt.
+- **Page convention** — Mọi trang wiki đều có cấu trúc cố định: Summary, Key Points, Relationships, Sources, Last Updated.
+
+Mỗi lần vault phát triển, tôi cập nhật `CLAUDE.md`. Đây là file duy nhất tôi tự viết — phần còn lại LLM lo.
+
+---
+
+## Tại sao cách này khác với những gì tôi đã thử
+
+Vấn đề với Notion hay Obsidian thông thường: **tôi phải làm tất cả công việc bảo trì**. Cập nhật cross-reference, giữ summary hiện tại, ghi chú khi thông tin mới mâu thuẫn với thông tin cũ. Sau vài tháng tôi bỏ cuộc vì tốn quá nhiều công.
+
+LLM không chán. LLM không quên cập nhật cross-reference. LLM có thể touch 10-15 file trong một lần ingest mà không mắc lỗi.
+
+Chi phí bảo trì gần bằng không — đó là lý do hệ thống này có thể hoạt động lâu dài.
+
+---
+
+## Workflow thực tế hiện tại
+
+| Tần suất | Việc làm |
+|----------|----------|
+| Mỗi lần có tài liệu | `/ingest` |
+| Cuối tuần | Xem `daily/`, ingest nếu có ghi chú giá trị |
+| Hàng tháng | `/lint` |
+| Mỗi quý | `/synthesize` một chủ đề đã đủ trang |
+
+---
+
+## Tài liệu nguồn tốt để ingest
+
+Những file nguồn cho kết quả ingest tốt nhất từ kinh nghiệm thực tế:
+
+- **Incident post-mortem** — Dày đặc entity, timeline, bài học cụ thể
+- **Design doc của một integration** — Architecture decision, ràng buộc kỹ thuật
+- **Ghi chú debug session** — Chuỗi suy luận nguyên bản, rất khó tái tạo sau
+- **Meeting notes với khách hàng** — Domain knowledge thường chỉ tồn tại ở đây
+- **Chương sách kỹ thuật** — Khung lý thuyết để gắn kinh nghiệm thực tế vào
+
+Tránh ingest tài liệu quá chung chung hoặc marketing. LLM sẽ tạo ra wiki pages nhạt nhẽo.
+
+---
+
+## Hệ thống này có nên lên GitHub không?
+
+Câu trả lời tôi tự trả lời cho mình: **Không nên dùng chung repo với blog.**
+
+`raw/` chứa incident report, thông tin hệ thống nội bộ — không phù hợp public. Giải pháp là tách thành **repo private riêng**.
+
+```
+D:\Projects\my-second-brain\   ← repo private trên GitHub
+D:\Projects\anhnbt.github.io\  ← blog public này
+```
+
+Wiki (`wiki/`) và commands (`.claude/commands/`) có thể public nếu muốn. Raw thì không.
+
+---
+
+## Còn lại gì cần làm
+
+Hệ thống mới chỉ setup xong skeleton. Thứ làm nó có giá trị là **nội dung được ingest theo thời gian**.
+
+Tôi đang lên danh sách các trang cần có đầu tiên:
+
+1. Production System Operations — hub cho toàn bộ kiến thức vận hành
+2. Long-Running System Maintenance — 8 năm làm production, phần khó nhất
+3. Production Debugging Methodology — quy trình debug có hệ thống
+4. Spring Boot Production Patterns — primary stack
+5. Database Schema Evolution — thao tác rủi ro nhất trên production
+6. Vietnam E-Invoice Integration (HĐĐT) — domain đặc thù Việt Nam
+7. Zero-Downtime Deployment — ràng buộc cứng trong môi trường điện lực
+8. System Integration Patterns — banking, payment, notification
+9. Personal Operating System — meta-system
+10. Teaching and Knowledge Transfer — nghề tay trái
+
+Khi vault đủ 10-15 trang về một chủ đề, tôi sẽ chạy `/synthesize` lần đầu để xem nó tổng hợp ra cái gì.
+
+---
+
+*Ghi chú này sẽ được cập nhật khi hệ thống đã vận hành đủ lâu để có đánh giá thực tế.*

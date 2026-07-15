@@ -170,21 +170,21 @@ Sau khi di chuyển thành công toàn bộ tệp tin `.bak` sang máy chủ m�
 Bạn hãy tạo một file `RestoreAll.sql` với nội dung tự động hóa như sau (sử dụng dữ liệu giả lập để làm mẫu):
 
 ```sql
--- Restore ANBINH
-RESTORE DATABASE [ANBINH] 
-FROM DISK = N'\\IP_SERVER_CU\Backup\ANBINH.bak' 
+-- Restore DB_Demo1
+RESTORE DATABASE [DB_Demo1] 
+FROM DISK = N'\\IP_SERVER_CU\Backup\DB_Demo1.bak' 
 WITH FILE = 1, 
-MOVE N'ANBINH' TO N'D:\SQLData\ANBINH.mdf', 
-MOVE N'ANBINH_log' TO N'D:\SQLData\ANBINH_log.ldf', 
+MOVE N'DB_Demo1' TO N'D:\SQLData\DB_Demo1.mdf', 
+MOVE N'DB_Demo1_log' TO N'D:\SQLData\DB_Demo1_log.ldf', 
 NOUNLOAD, REPLACE, STATS = 5;
 GO
 
--- Restore CHICONG
-RESTORE DATABASE [CHICONG] 
-FROM DISK = N'\\IP_SERVER_CU\Backup\CHICONG.bak' 
+-- Restore DB_Demo2
+RESTORE DATABASE [DB_Demo2] 
+FROM DISK = N'\\IP_SERVER_CU\Backup\DB_Demo2.bak' 
 WITH FILE = 1, 
-MOVE N'CHICONG' TO N'D:\SQLData\CHICONG.mdf', 
-MOVE N'CHICONG_log' TO N'D:\SQLData\CHICONG_log.ldf', 
+MOVE N'DB_Demo2' TO N'D:\SQLData\DB_Demo2.mdf', 
+MOVE N'DB_Demo2_log' TO N'D:\SQLData\DB_Demo2_log.ldf', 
 NOUNLOAD, REPLACE, STATS = 5;
 GO
 
@@ -205,7 +205,7 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
    * Mở Notepad hoặc trình soạn thảo code của bạn.
    * Sao chép một khối lệnh mẫu phía trên.
    * Nhân bản (Duplicate) khối lệnh đó lên bằng đúng số lượng database bạn cần restore.
-   * Sử dụng tính năng **Find & Replace (Ctrl + H)**: Thay thế nhanh tên database `ANBINH` bằng tên các database thực tế khác của bạn.
+   * Sử dụng tính năng **Find & Replace (Ctrl + H)**: Thay thế nhanh tên database `DB_Demo1` bằng tên các database thực tế khác của bạn.
 2. **Sử dụng SQL Query để sinh code tự động:** Bạn cũng có thể chạy lệnh SQL sau trên Server cũ để tự động sinh ra chuỗi các câu lệnh Restore một cách chính xác nhất:
    ```sql
    SELECT 'RESTORE DATABASE [' + name + '] FROM DISK = N''D:\Backup_Databases\' + name + '.bak'' WITH FILE = 1, MOVE N''' + name + ''' TO N''D:\SQLData\' + name + '.mdf'', MOVE N''' + name + '_log'' TO N''D:\SQLData\' + name + '_log.ldf'', NOUNLOAD, REPLACE, STATS = 5; GO'
@@ -216,9 +216,9 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
 ### Lưu ý quan trọng cho buổi tối "Cut-over":
 
 * **Đường dẫn thư mục chứa dữ liệu:** Hãy chắc chắn thư mục `D:\SQLData\` trên máy chủ mới đã được tạo sẵn trước khi chạy script restore. Nếu thư mục này chưa tồn tại, SQL Server sẽ báo lỗi không tìm thấy đường dẫn đĩa và quá trình khôi phục sẽ thất bại.
-* **Kiểm tra chính xác Logical File Name:** Trước khi chạy script Restore, hãy dùng lệnh `RESTORE FILELISTONLY` để kiểm tra chính xác tên file logic (tên trong mệnh đề `MOVE N'...'`) của từng database. Đôi khi tên database hiển thị là `ANBINH` nhưng tên file logic thực tế bên trong có thể là `ANBINH_Data`, `ANBINH_Primary` hoặc một tên khác tùy theo cách cấu hình ban đầu.
+* **Kiểm tra chính xác Logical File Name:** Trước khi chạy script Restore, hãy dùng lệnh `RESTORE FILELISTONLY` để kiểm tra chính xác tên file logic (tên trong mệnh đề `MOVE N'...'`) của từng database. Đôi khi tên database hiển thị là `DB_Demo1` nhưng tên file logic thực tế bên trong có thể là `DB_Demo1_Data`, `DB_Demo1_Primary` hoặc một tên khác tùy theo cách cấu hình ban đầu.
   ```sql
-  RESTORE FILELISTONLY FROM DISK = N'D:\Backup_Databases\ANBINH.bak'
+  RESTORE FILELISTONLY FROM DISK = N'D:\Backup_Databases\DB_Demo1.bak'
   ```
 
 ---

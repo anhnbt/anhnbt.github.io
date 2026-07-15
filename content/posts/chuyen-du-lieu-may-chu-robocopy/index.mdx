@@ -212,6 +212,34 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
    FROM sys.databases
    WHERE name NOT IN ('master','model','msdb','tempdb')
    ```
+3. **Sử dụng PowerShell để tự động quét thư mục và xuất file script:**
+   Để xuất trực tiếp ra file `.txt` hoặc `.sql` thay vì hiện trên màn hình (tránh việc copy từ màn hình console bị xuống dòng sai lệch), bạn chỉ cần chạy đoạn script sau trong cửa sổ PowerShell:
+
+   ```powershell
+   # Đường dẫn chứa file bak
+   $backupPath = "C:\Backup_Databases"
+   # Đường dẫn dữ liệu SQL Server mới
+   $sqlDataPath = "C:\SQLData" 
+   # Đường dẫn file kết quả
+   $outputFile = "C:\EAGENT\RestoreScript.txt"
+
+   $backups = Get-ChildItem -Path $backupPath -Filter *.bak
+   $result = @()
+
+   foreach ($file in $backups) {
+       $dbName = $file.BaseName
+       $mdfPath = "$sqlDataPath\$dbName.mdf"
+       $ldfPath = "$sqlDataPath\$dbName_log.ldf"
+       
+       # Tạo câu lệnh và lưu vào mảng
+       $cmd = "RESTORE DATABASE [$dbName] FROM DISK = N'$($file.FullName)' WITH FILE = 1, MOVE N'$dbName' TO N'$mdfPath', MOVE N'$dbName" + "_log' TO N'$ldfPath', NOUNLOAD, REPLACE, STATS = 5; GO"
+       $result += $cmd
+   }
+
+   # Xuất ra file txt
+   $result | Out-File -FilePath $outputFile -Encoding utf8
+   Write-Host "Đã xuất script xong tại: $outputFile"
+   ```
 
 ### Lưu ý quan trọng cho buổi tối "Cut-over":
 

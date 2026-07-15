@@ -67,3 +67,11 @@ public
 .idea
 .vscode
 .DS_Store
+
+# Agents and MCP config
+.agents/
+.mcp.json
+skills-lock.json
+
+# RenderCV output
+rendercv_output/

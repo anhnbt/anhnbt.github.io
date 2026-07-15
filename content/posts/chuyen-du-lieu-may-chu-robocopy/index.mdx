@@ -60,6 +60,9 @@ CLOSE db_cursor
 DEALLOCATE db_cursor
 ```
 
+![Kịch bản T-SQL để Backup toàn bộ Database](./kich-ban-t-sql-de-backup-toan-bo-database.png)
+
+
 ### Hướng dẫn sử dụng:
 
 1. **Thay đổi đường dẫn:** Hãy đảm bảo biến `@path` khớp với thư mục mà bạn đã tạo sẵn trên ổ đĩa có dung lượng lớn của máy chủ cũ (ví dụ: `C:\Backup_Databases\`).
@@ -80,10 +83,14 @@ DEALLOCATE db_cursor
 * Tích chọn **Share this folder**.
 * Nhấp vào **Permissions**, chọn nhóm `Everyone` (hoặc tài khoản cụ thể) và cấp quyền **Read** (hoặc **Full Control** tùy nhu cầu bảo mật mạng nội bộ).
 
+![Thiết lập Share (Sharing)](./thiet-lap-share-sharing.png)
+
 ### 2. Thiết lập bảo mật hệ thống (Security)
 * Cũng trong cửa sổ **Properties**, chuyển sang tab **Security**.
 * Nhấp **Edit** -> **Add** để thêm nhóm người dùng tương ứng (ví dụ: `Everyone` hoặc tài khoản domain cụ thể).
 * Đảm bảo tích chọn tối thiểu quyền **Read & execute**, **List folder contents**, và **Read** trong cột **Allow**.
+
+![Thiết lập bảo mật hệ thống (Security)](./thiet-lap-bao-mat-he-thong-security.png)
 
 ### 3. Xác nhận Network Path
 * Sau khi hoàn tất cấu hình, hệ thống sẽ hiển thị một dòng **Network Path** có dạng: `\\TEN_MAY_CU\Backup_Databases` hoặc `\\IP_MAY_CU\Backup_Databases`. Đây chính là đường dẫn nguồn bạn sẽ sử dụng trong lệnh Robocopy.
@@ -153,6 +160,66 @@ robocopy "\\192.168.1.100\Backup_Databases" "D:\Restore_Databases" /MIR /FFT /Z 
    * Chạy lại script T-SQL để tạo file backup mới nhất trên máy cũ.
    * Chạy lại lệnh Robocopy. Lần này Robocopy sẽ chạy cực kỳ nhanh (chỉ mất vài chục giây đến vài phút) vì nó chỉ copy những file backup mới sinh ra trong bước trên.
 4. **Khôi phục (Restore):** Tiến hành Restore cơ sở dữ liệu trên máy chủ mới và trỏ cấu hình kết nối (Connection String) của ứng dụng sang IP server mới.
+
+---
+
+## Bước 6: Cách tạo 1 file Script Restore hàng loạt
+
+Sau khi di chuyển thành công toàn bộ tệp tin `.bak` sang máy chủ mới bằng Robocopy, bước cuối cùng là khôi phục (Restore) chúng vào SQL Server đích. Nếu bạn có hàng chục cơ sở dữ liệu, việc thực hiện bằng giao diện SSMS sẽ cực kỳ mất thời gian.
+
+Bạn hãy tạo một file `RestoreAll.sql` với nội dung tự động hóa như sau (sử dụng dữ liệu giả lập để làm mẫu):
+
+```sql
+-- Restore ANBINH
+RESTORE DATABASE [ANBINH] 
+FROM DISK = N'\\IP_SERVER_CU\Backup\ANBINH.bak' 
+WITH FILE = 1, 
+MOVE N'ANBINH' TO N'D:\SQLData\ANBINH.mdf', 
+MOVE N'ANBINH_log' TO N'D:\SQLData\ANBINH_log.ldf', 
+NOUNLOAD, REPLACE, STATS = 5;
+GO
+
+-- Restore CHICONG
+RESTORE DATABASE [CHICONG] 
+FROM DISK = N'\\IP_SERVER_CU\Backup\CHICONG.bak' 
+WITH FILE = 1, 
+MOVE N'CHICONG' TO N'D:\SQLData\CHICONG.mdf', 
+MOVE N'CHICONG_log' TO N'D:\SQLData\CHICONG_log.ldf', 
+NOUNLOAD, REPLACE, STATS = 5;
+GO
+
+-- Tiếp tục copy các khối lệnh trên cho các database còn lại...
+```
+
+### Tại sao nên gộp các lệnh Restore vào cùng 1 file?
+
+* **Tiết kiệm thời gian:** Bạn không cần phải đóng mở file script hay thực hiện thao tác click chuột liên tục trên giao diện SSMS.
+* **Kiểm soát thứ tự:** Bạn biết chắc chắn database nào được restore trước, database nào sau, rất thuận tiện cho các ứng dụng có sự phụ thuộc chéo.
+* **Dễ theo dõi lỗi:** Nếu một lệnh bị lỗi, SQL Server sẽ dừng lại hoặc báo lỗi chi tiết ngay tại khối lệnh đó, giúp bạn biết chính xác database nào đang gặp vấn đề để xử lý ngay lập tức.
+
+### Mẹo để tạo nhanh file Script Restore hàng loạt (Automation)
+
+Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng khối lệnh. Bạn có thể dùng các mẹo sau để tạo nhanh:
+
+1. **Sử dụng Notepad++ / VS Code:**
+   * Mở Notepad hoặc trình soạn thảo code của bạn.
+   * Sao chép một khối lệnh mẫu phía trên.
+   * Nhân bản (Duplicate) khối lệnh đó lên bằng đúng số lượng database bạn cần restore.
+   * Sử dụng tính năng **Find & Replace (Ctrl + H)**: Thay thế nhanh tên database `ANBINH` bằng tên các database thực tế khác của bạn.
+2. **Sử dụng SQL Query để sinh code tự động:** Bạn cũng có thể chạy lệnh SQL sau trên Server cũ để tự động sinh ra chuỗi các câu lệnh Restore một cách chính xác nhất:
+   ```sql
+   SELECT 'RESTORE DATABASE [' + name + '] FROM DISK = N''D:\Backup_Databases\' + name + '.bak'' WITH FILE = 1, MOVE N''' + name + ''' TO N''D:\SQLData\' + name + '.mdf'', MOVE N''' + name + '_log'' TO N''D:\SQLData\' + name + '_log.ldf'', NOUNLOAD, REPLACE, STATS = 5; GO'
+   FROM sys.databases
+   WHERE name NOT IN ('master','model','msdb','tempdb')
+   ```
+
+### Lưu ý quan trọng cho buổi tối "Cut-over":
+
+* **Đường dẫn thư mục chứa dữ liệu:** Hãy chắc chắn thư mục `D:\SQLData\` trên máy chủ mới đã được tạo sẵn trước khi chạy script restore. Nếu thư mục này chưa tồn tại, SQL Server sẽ báo lỗi không tìm thấy đường dẫn đĩa và quá trình khôi phục sẽ thất bại.
+* **Kiểm tra chính xác Logical File Name:** Trước khi chạy script Restore, hãy dùng lệnh `RESTORE FILELISTONLY` để kiểm tra chính xác tên file logic (tên trong mệnh đề `MOVE N'...'`) của từng database. Đôi khi tên database hiển thị là `ANBINH` nhưng tên file logic thực tế bên trong có thể là `ANBINH_Data`, `ANBINH_Primary` hoặc một tên khác tùy theo cách cấu hình ban đầu.
+  ```sql
+  RESTORE FILELISTONLY FROM DISK = N'D:\Backup_Databases\ANBINH.bak'
+  ```
 
 ---
 

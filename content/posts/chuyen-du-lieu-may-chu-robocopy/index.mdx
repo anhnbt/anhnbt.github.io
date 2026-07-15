@@ -208,7 +208,7 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
    * Sử dụng tính năng **Find & Replace (Ctrl + H)**: Thay thế nhanh tên database `DB_Demo1` bằng tên các database thực tế khác của bạn.
 2. **Sử dụng SQL Query để sinh code tự động:** Bạn cũng có thể chạy lệnh SQL sau trên Server cũ để tự động sinh ra chuỗi các câu lệnh Restore một cách chính xác nhất:
    ```sql
-   SELECT 'RESTORE DATABASE [' + name + '] FROM DISK = N''D:\Backup_Databases\' + name + '.bak'' WITH FILE = 1, MOVE N''' + name + ''' TO N''D:\SQLData\' + name + '.mdf'', MOVE N''' + name + '_log'' TO N''D:\SQLData\' + name + '_log.ldf'', NOUNLOAD, REPLACE, STATS = 5; GO'
+   SELECT 'RESTORE DATABASE [' + name + '] FROM DISK = N''D:\Backup_Databases\' + name + '.bak'' WITH FILE = 1, MOVE N''' + name + ''' TO N''D:\SQLData\' + name + '.mdf'', MOVE N''' + name + '_log'' TO N''D:\SQLData\' + name + '_log.ldf'', NOUNLOAD, REPLACE, STATS = 5;' + CHAR(13) + CHAR(10) + 'GO'
    FROM sys.databases
    WHERE name NOT IN ('master','model','msdb','tempdb')
    ```
@@ -238,7 +238,7 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
            $ldfFile = Get-ChildItem -Path $subFolder.FullName -Filter "*.ldf" | Select-Object -First 1
            
            if ($mdfFile -and $ldfFile) {
-               $cmd = "RESTORE DATABASE [$dbName] FROM DISK = N'$($file.FullName)' WITH FILE = 1, MOVE N'$dbName' TO N'$($mdfFile.FullName)', MOVE N'$dbName" + "_log' TO N'$($ldfFile.FullName)', NOUNLOAD, REPLACE, STATS = 5; GO"
+                $cmd = "RESTORE DATABASE [$dbName] FROM DISK = N'$($file.FullName)' WITH FILE = 1, MOVE N'$dbName' TO N'$($mdfFile.FullName)', MOVE N'$dbName" + "_log' TO N'$($ldfFile.FullName)', NOUNLOAD, REPLACE, STATS = 5;`r`nGO"
                $result += $cmd
            }
        }
@@ -252,10 +252,20 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
 ### Lưu ý quan trọng cho buổi tối "Cut-over":
 
 * **Đường dẫn thư mục chứa dữ liệu:** Hãy chắc chắn thư mục `D:\SQLData\` trên máy chủ mới đã được tạo sẵn trước khi chạy script restore. Nếu thư mục này chưa tồn tại, SQL Server sẽ báo lỗi không tìm thấy đường dẫn đĩa và quá trình khôi phục sẽ thất bại.
-* **Kiểm tra chính xác Logical File Name:** Trước khi chạy script Restore, hãy dùng lệnh `RESTORE FILELISTONLY` để kiểm tra chính xác tên file logic (tên trong mệnh đề `MOVE N'...'`) của từng database. Đôi khi tên database hiển thị là `DB_Demo1` nhưng tên file logic thực tế bên trong có thể là `DB_Demo1_Data`, `DB_Demo1_Primary` hoặc một tên khác tùy theo cách cấu hình ban đầu.
+* **Kiểm tra chính xác Logical File Name (Tránh lỗi Msg 3234):** Trước khi chạy script Restore, hãy dùng lệnh `RESTORE FILELISTONLY` để kiểm tra chính xác tên file logic (tên trong mệnh đề `MOVE N'...'`) của từng database.
+  
+  Nếu bạn gặp lỗi:
+  ```text
+  Msg 3234, Level 16, State 2, Line 1
+  Logical file 'DB_Demo1' is not part of database 'DB_Demo1'.
+  ```
+  Điều này nghĩa là tên logic lưu trong file backup khác với tên bạn chỉ định trong lệnh `MOVE`. Ví dụ, nhiều database trong hệ thống multi-tenant được clone từ một DB gốc tên là `GOC` thì tên logic của chúng vẫn sẽ là `GOC` và `GOC_log`.
+  
+  Bạn hãy chạy lệnh sau để kiểm tra:
   ```sql
   RESTORE FILELISTONLY FROM DISK = N'D:\Backup_Databases\DB_Demo1.bak'
   ```
+  Sau đó, lấy chính xác giá trị ở cột `LogicalName` để đưa vào mệnh đề `MOVE N'LogicalName'`.
 
 ---
 

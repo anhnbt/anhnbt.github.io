@@ -172,19 +172,19 @@ Bạn hãy tạo một file `RestoreAll.sql` với nội dung tự động hóa 
 ```sql
 -- Restore DB_Demo1
 RESTORE DATABASE [DB_Demo1] 
-FROM DISK = N'\\IP_SERVER_CU\Backup\DB_Demo1.bak' 
+FROM DISK = N'C:\EAGENT\Backup_Databases\DB_Demo1_20260714_151857.bak' 
 WITH FILE = 1, 
-MOVE N'DB_Demo1' TO N'D:\SQLData\DB_Demo1.mdf', 
-MOVE N'DB_Demo1_log' TO N'D:\SQLData\DB_Demo1_log.ldf', 
+MOVE N'DB_Demo1' TO N'C:\EAGENT\EAGENT-DATA\EAGENT_DB_Demo1\EAGENT_DB_Demo1.mdf', 
+MOVE N'DB_Demo1_log' TO N'C:\EAGENT\EAGENT-DATA\EAGENT_DB_Demo1\EAGENT_DB_Demo1_1.ldf', 
 NOUNLOAD, REPLACE, STATS = 5;
 GO
 
 -- Restore DB_Demo2
 RESTORE DATABASE [DB_Demo2] 
-FROM DISK = N'\\IP_SERVER_CU\Backup\DB_Demo2.bak' 
+FROM DISK = N'C:\EAGENT\Backup_Databases\DB_Demo2_20260714_151857.bak' 
 WITH FILE = 1, 
-MOVE N'DB_Demo2' TO N'D:\SQLData\DB_Demo2.mdf', 
-MOVE N'DB_Demo2_log' TO N'D:\SQLData\DB_Demo2_log.ldf', 
+MOVE N'DB_Demo2' TO N'C:\EAGENT\EAGENT-DATA\EAGENT_DB_Demo2\EAGENT_DB_Demo2.mdf', 
+MOVE N'DB_Demo2_log' TO N'C:\EAGENT\EAGENT-DATA\EAGENT_DB_Demo2\EAGENT_DB_Demo2_1.ldf', 
 NOUNLOAD, REPLACE, STATS = 5;
 GO
 
@@ -212,14 +212,14 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
    FROM sys.databases
    WHERE name NOT IN ('master','model','msdb','tempdb')
    ```
-3. **Sử dụng PowerShell để tự động quét thư mục và xuất file script:**
-   Để xuất trực tiếp ra file `.txt` hoặc `.sql` thay vì hiện trên màn hình (tránh việc copy từ màn hình console bị xuống dòng sai lệch), bạn chỉ cần chạy đoạn script sau trong cửa sổ PowerShell:
+3. **Sử dụng PowerShell để quét thư mục con và tự động xuất file script:**
+   Trong trường hợp thực tế, cấu trúc thư mục dữ liệu SQL Server đích có thể chứa nhiều thư mục con tương ứng cho từng database (ví dụ: `C:\EAGENT\EAGENT-DATA\EAGENT_ANBINH`), việc chỉ định một đường dẫn phẳng sẽ bị lỗi. Để giải quyết, bạn có thể sử dụng đoạn script PowerShell thông minh dưới đây để tự động quét thư mục con, tìm chính xác tệp `.mdf`, `.ldf` và xuất câu lệnh Restore ra tệp `.txt` (hoặc `.sql`):
 
    ```powershell
-   # Đường dẫn chứa file bak
-   $backupPath = "C:\Backup_Databases"
-   # Đường dẫn dữ liệu SQL Server mới
-   $sqlDataPath = "C:\SQLData" 
+   # Đường dẫn chứa các file .bak đã copy sang
+   $backupPath = "C:\EAGENT\Backup_Databases"
+   # Đường dẫn thư mục chứa các thư mục con (ví dụ: EAGENT_ANBINH)
+   $dataRootPath = "C:\EAGENT\EAGENT-DATA"
    # Đường dẫn file kết quả
    $outputFile = "C:\EAGENT\RestoreScript.txt"
 
@@ -227,13 +227,21 @@ Nếu bạn có tới 20-30 database như trong ảnh, đừng gõ tay từng kh
    $result = @()
 
    foreach ($file in $backups) {
-       $dbName = $file.BaseName
-       $mdfPath = "$sqlDataPath\$dbName.mdf"
-       $ldfPath = "$sqlDataPath\$dbName_log.ldf"
+       $dbName = $file.BaseName # Ví dụ: ANBINH
        
-       # Tạo câu lệnh và lưu vào mảng
-       $cmd = "RESTORE DATABASE [$dbName] FROM DISK = N'$($file.FullName)' WITH FILE = 1, MOVE N'$dbName' TO N'$mdfPath', MOVE N'$dbName" + "_log' TO N'$ldfPath', NOUNLOAD, REPLACE, STATS = 5; GO"
-       $result += $cmd
+       # Tìm thư mục con tương ứng (ví dụ: C:\EAGENT\EAGENT-DATA\EAGENT_ANBINH)
+       $subFolder = Get-ChildItem -Path $dataRootPath -Filter "EAGENT_$dbName" -Directory | Select-Object -First 1
+       
+       if ($subFolder) {
+           # Tìm file .mdf và .ldf bên trong thư mục con đó
+           $mdfFile = Get-ChildItem -Path $subFolder.FullName -Filter "*.mdf" | Select-Object -First 1
+           $ldfFile = Get-ChildItem -Path $subFolder.FullName -Filter "*.ldf" | Select-Object -First 1
+           
+           if ($mdfFile -and $ldfFile) {
+               $cmd = "RESTORE DATABASE [$dbName] FROM DISK = N'$($file.FullName)' WITH FILE = 1, MOVE N'$dbName' TO N'$($mdfFile.FullName)', MOVE N'$dbName" + "_log' TO N'$($ldfFile.FullName)', NOUNLOAD, REPLACE, STATS = 5; GO"
+               $result += $cmd
+           }
+       }
    }
 
    # Xuất ra file txt

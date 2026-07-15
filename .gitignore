@@ -75,3 +75,6 @@ skills-lock.json
 
 # RenderCV output
 rendercv_output/
+
+# Local SQL scripts
+RestoreAll.sql

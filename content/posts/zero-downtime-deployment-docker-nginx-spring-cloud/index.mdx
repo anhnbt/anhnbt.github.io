@@ -1,0 +1,421 @@
+---
+title: 'Zero-Downtime Deployment với Docker, Nginx và Spring Cloud'
+date: 2026-08-27
+description: 'Chia sẻ cách mình triển khai Zero-Downtime cho hệ thống microservices Spring Cloud trên một VPS duy nhất với Docker và Nginx.'
+slug: "/zero-downtime-deployment-docker-nginx-spring-cloud"
+tags:
+  - DevOps
+  - Docker
+  - Nginx
+  - Spring Cloud
+  - Microservices
+  - Zero-Downtime
+banner: ./banner.jpg
+---
+
+## Bài toán thực tế
+
+Hệ thống mình đang vận hành gồm hơn chục dịch vụ Spring Boot, tất cả chạy trên một VPS duy nhất bằng Docker Compose. Mỗi lần deploy phiên bản mới, quy trình cũ là `docker compose stop` rồi `docker compose up`. Trong khoảng thời gian đó, người dùng sẽ thấy trang trắng hoặc lỗi 503.
+
+Mình cần tìm cách cập nhật code mà không làm gián đoạn người dùng.
+
+Bài viết này là kinh nghiệm thực tế từ hệ thống 14+ services chạy trên Spring Cloud, triển khai trên VPS 6 core / 24 GB RAM.
+
+## Kiến trúc hệ thống
+
+Trước hết, mình mô tả lại kiến trúc đang chạy để bạn hình dung:
+
+```
+Client (HTTPS:443)
+    │
+    ▼
+Nginx (Host OS) ──► proxy_pass 127.0.0.1:8888
+    │
+    ▼
+Spring Cloud Gateway (:8888)
+    │
+    ▼
+Eureka Discovery (:8761)
+    │
+    ├── SSO Service (:8000)
+    ├── Category Service (:8001)
+    ├── Payment Service (:8628)
+    ├── Report Service (:8027)
+    ├── Notification Service (:8023)
+    └── ... (10+ services khác)
+```
+
+Mấy điểm quan trọng cần lưu ý:
+
+- Tất cả services dùng `network_mode: host`, mỗi service bind trực tiếp vào một port cố định trên host.
+- Spring Cloud Gateway route request dựa trên Eureka Service Registry.
+- Mỗi service chỉ chạy 1 instance (không thể scale do dùng host network).
+
+## Chiến lược 1: Blue-Green Deployment
+
+### Ý tưởng
+
+Blue-Green Deployment duy trì hai môi trường giống hệt nhau chạy song song. Blue là phiên bản hiện tại đang phục vụ người dùng, Green là phiên bản mới được deploy và kiểm tra sẵn sàng.
+
+Khi Green đã healthy, Nginx chuyển traffic từ Blue sang Green ngay lập tức. Nếu có lỗi, chuyển ngược lại để rollback.
+
+```
+        ┌─────────────┐
+        │    Nginx     │
+        │  (upstream)  │
+        └──────┬──────┘
+               │
+        ┌──────┴──────┐
+        ▼             ▼
+  ┌──────────┐  ┌──────────┐
+  │   Blue   │  │  Green   │
+  │  (v1.0)  │  │  (v1.1)  │
+  │  :8888   │  │  :8889   │
+  └──────────┘  └──────────┘
+     active       standby
+```
+
+### Bài toán xung đột port
+
+Đây là câu hỏi đầu tiên mình phải giải quyết: nếu Blue đang chiếm port 8888, Green lấy port nào?
+
+Khi dùng `network_mode: host`, mỗi container bind trực tiếp vào port của host. Hai container không thể cùng listen trên port 8888. Mình tìm được 3 cách xử lý.
+
+#### Cách 1: Bridge Network + Docker Internal DNS
+
+Chuyển từ `host` sang `bridge` network. Trong bridge network, mỗi container có IP riêng nên cả Blue và Green đều có thể dùng cùng port 8888 bên trong container mà không xung đột:
+
+```yaml
+services:
+  gateway-blue:
+    build: ./gateway
+    networks: [app-net]
+    # Không cần ports mapping - Nginx truy cập qua Docker DNS
+    environment:
+      - SERVER_PORT=8888
+
+  gateway-green:
+    build: ./gateway
+    networks: [app-net]
+    environment:
+      - SERVER_PORT=8888  # Cùng port, khác container IP
+
+networks:
+  app-net:
+    driver: bridge
+```
+
+Nginx sử dụng Docker DNS để phân giải:
+
+```nginx
+upstream gateway_backend {
+    server gateway-blue:8888;
+    server gateway-green:8888 backup;
+}
+```
+
+Cách này sạch sẽ, không cần quản lý port kép. Nhưng đánh đổi lớn là phải chuyển toàn bộ inter-service communication từ `localhost` sang container name. Eureka, Redis (`localhost:6379`), Kafka (`localhost:9092`), tất cả đều phải sửa. Đây là thay đổi kiến trúc lớn và rủi ro cao.
+
+#### Cách 2: Dual Port trên Host
+
+Giữ `network_mode: host`, Green instance dùng port khác:
+
+```yaml
+services:
+  gateway:          # Blue
+    network_mode: host
+    environment:
+      - SERVER_PORT=8888
+
+  gateway-green:    # Green
+    network_mode: host
+    environment:
+      - SERVER_PORT=8889  # Port khác
+```
+
+Nginx cấu hình upstream:
+
+```nginx
+upstream gateway_backend {
+    server 127.0.0.1:8888;        # Blue (active)
+    server 127.0.0.1:8889 backup; # Green (standby)
+}
+```
+
+Khi deploy, bật Green trên port 8889, chờ healthy, rồi chỉnh Nginx chuyển traffic:
+
+```nginx
+upstream gateway_backend {
+    server 127.0.0.1:8888 backup; # Blue (giờ là standby)
+    server 127.0.0.1:8889;        # Green (giờ là active)
+}
+```
+
+Cách này thay đổi tối thiểu, giữ nguyên host network. Nhưng phải maintain bảng port mapping kép cho mọi service (14 services × 2 = 28 ports). Eureka cũng cần nhận biết cả 2 instance.
+
+#### Cách 3: Chỉ Blue-Green cho Gateway (cách mình chọn)
+
+Vì Nginx chỉ proxy vào Gateway duy nhất, mình chỉ cần Blue-Green cho Gateway:
+
+```
+Nginx ──► upstream {
+            127.0.0.1:8888 (Blue)
+            127.0.0.1:8889 (Green)  backup
+          }
+              │
+              ▼
+       Gateway (Blue hoặc Green)
+              │
+              ▼
+         Eureka ──► 12 Backend Services
+                    (giữ nguyên rolling update)
+```
+
+Backend services (SSO, Payment, Report...) vẫn dùng rolling update vì Eureka đã quản lý routing cho chúng.
+
+Effort rất nhỏ, chỉ cần thêm 1 container Gateway (~350MB RAM). Rollback tức thì bằng `nginx -s reload`. Đánh đổi duy nhất là chỉ Zero-Downtime cho tầng Gateway, backend services vẫn có micro-downtime khoảng 1-2 phút khi deploy.
+
+### So sánh 3 cách
+
+| Tiêu chí | Bridge Network | Dual Port | Gateway-only |
+|----------|----------------|-----------|--------------|
+| Port conflict | ✅ Không có | ✅ Port kép | ✅ Chỉ 2 port |
+| Effort | 🔴 Rất lớn | 🟡 Trung bình | 🟢 Rất nhỏ |
+| Rủi ro | 🔴 Cao | 🟡 Vừa | 🟢 Thấp |
+| RAM thêm | 🔴 ~7 GiB | 🔴 ~7 GiB | 🟢 ~350 MiB |
+| Zero-Downtime | ✅ 100% | ✅ 100% | ⚠️ Gateway 100%, backend ~1-2p |
+
+## Chiến lược 2: Rolling Update + Eureka
+
+Ngoài Blue-Green, mình còn dùng một cách khác tận dụng chính Spring Cloud Eureka. Ý tưởng là deregister service trước khi stop, chờ Gateway đồng bộ, rồi mới thay container mới.
+
+### Luồng deploy
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    ROLLING UPDATE FLOW                    │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│  1. POST /actuator/service-registry?status=OUT_OF_SERVICE│
+│     → Eureka đánh dấu service là OUT_OF_SERVICE          │
+│                                                          │
+│  2. sleep 45s                                            │
+│     → Chờ Gateway đồng bộ cache, ngừng route tới service │
+│                                                          │
+│  3. docker stop + docker rm (container cũ)               │
+│     → Graceful shutdown, hoàn thành in-flight requests   │
+│                                                          │
+│  4. docker compose up -d (container mới)                 │
+│     → Container mới khởi động                            │
+│                                                          │
+│  5. Health check polling (tối đa 6 phút)                 │
+│     → 72 lần × 5s, chờ /actuator/health trả về UP       │
+│                                                          │
+│  6. Container mới tự đăng ký vào Eureka                  │
+│     → Gateway bắt đầu route traffic đến service mới     │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Script deploy rút gọn
+
+Dưới đây là phiên bản rút gọn, tập trung vào phần logic Zero-Downtime:
+
+```bash
+#!/bin/bash
+set -e
+
+SERVICE_NAME=$1
+PORT=${SERVICE_PORTS[$SERVICE_NAME]}
+
+# Tạo file chặn cảnh báo healthcheck trong thời gian deploy
+touch "/tmp/healthcheck_ignore_${SERVICE_NAME}"
+
+# Bẫy lỗi: tự động thông báo nếu script crash
+trap 'send_deploy_email "FAILED" "Script crash"; exit 1' ERR
+
+# ── Bước 1: Git Pull + Build ──
+cd $SERVICE_NAME && git fetch origin && git reset --hard origin/$BRANCH && cd ..
+mvn -f common/pom.xml clean install -DskipTests -B
+docker compose build $SERVICE_NAME
+
+# ── Bước 2: Tìm container cũ đang chạy ──
+OLD_CONTAINER=$(docker ps \
+  --filter "label=com.docker.compose.service=$SERVICE_NAME" \
+  --filter "status=running" --format "{{.Names}}")
+
+# ── Bước 3: Deregister khỏi Eureka TRƯỚC khi stop ──
+docker exec $OLD_CONTAINER curl -s -X POST \
+  "http://localhost:$PORT/actuator/service-registry?status=OUT_OF_SERVICE"
+
+# ── Bước 4: Chờ Gateway đồng bộ cache routing ──
+sleep 45
+
+# ── Bước 5: Dừng và thay thế container ──
+docker stop $OLD_CONTAINER && docker rm $OLD_CONTAINER
+docker compose up -d --scale ${SERVICE_NAME}=1 ${SERVICE_NAME}
+
+# ── Bước 6: Chờ container mới healthy ──
+for ((retry=1; retry<=72; retry++)); do
+    HEALTH=$(docker exec $NEW_CONTAINER curl -s \
+      "http://localhost:$PORT/actuator/health" || echo "failed")
+
+    if echo "$HEALTH" | grep -q '"status":"UP"'; then
+        echo "✅ Service $SERVICE_NAME đã UP!"
+        break
+    fi
+    sleep 5
+done
+
+# Dọn dẹp
+rm -f "/tmp/healthcheck_ignore_${SERVICE_NAME}"
+send_deploy_email "SUCCESS" ""
+```
+
+### Tích hợp GitHub Actions
+
+Mỗi service có một workflow `deploy.yml` trigger khi push vào branch `dev` hoặc `production`:
+
+```yaml
+name: Deploy Service
+on:
+  push:
+    branches: [dev, production]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'production' && 'Production' || 'Dev' }}
+    steps:
+      # (Tùy chọn) Kết nối VPN nếu VPS nằm trong mạng nội bộ
+      # - name: Connect to VPN
+      #   uses: <vpn-provider>/github-action@v2
+      #   with:
+      #     credentials: ${{ secrets.VPN_CREDENTIALS }}
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 30m
+          script: |
+            cd /app && ./deploy-service.sh <service-name>
+```
+
+> **Lưu ý bảo mật:** Tất cả thông tin nhạy cảm (host, port, SSH key) được lưu trong GitHub Secrets, không bao giờ hardcode trong workflow file. Nếu VPS nằm trong mạng nội bộ, thêm bước kết nối VPN (Tailscale, WireGuard, OpenVPN...) trước bước SSH.
+
+Luồng CI/CD khi ghép lại:
+1. Developer push code lên nhánh `dev` hoặc `production`.
+2. GitHub Actions kích hoạt, kết nối VPN vào mạng nội bộ (nếu cần).
+3. SSH vào VPS, chạy `deploy-service.sh`.
+4. Script tự động: git pull → build → rolling update → health check → thông báo.
+
+## Cấu hình Graceful Shutdown cho Spring Boot
+
+Phía ứng dụng cần hai cấu hình quan trọng trong `docker-compose.yml`:
+
+```yaml
+environment:
+  # Cho phép Spring Boot hoàn thành các request đang xử lý trước khi tắt
+  - SERVER_SHUTDOWN=graceful
+  # Thời gian tối đa chờ các request hoàn thành (30 giây)
+  - SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE=30s
+```
+
+Kết hợp với Docker healthcheck:
+
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+  interval: 15s
+  timeout: 5s
+  retries: 3
+```
+
+Khi `docker stop` gửi signal `SIGTERM`, Spring Boot sẽ ngừng nhận request mới, chờ tối đa 30 giây cho các request đang xử lý hoàn thành, rồi đóng connection pool, flush log và shutdown.
+
+## Cấu hình Nginx Reverse Proxy
+
+Mình cấu hình Nginx đứng trước Gateway với SSL, security headers và rate limiting:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name gateway.example.com;
+
+    ssl_certificate     /path/to/bundle.crt;
+    ssl_certificate_key /path/to/private.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    # Security Headers
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+
+    # Rate Limiting
+    limit_req zone=api_limit_zone burst=100 nodelay;
+
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Timeout cao cho các API xử lý lâu
+        proxy_connect_timeout 300;
+        proxy_send_timeout 300;
+        proxy_read_timeout 300;
+    }
+}
+```
+
+## Khoảng "Micro-Downtime" trong thực tế
+
+Mình nói thẳng: giải pháp Rolling Update + Eureka trên cùng một VPS không phải Zero-Downtime tuyệt đối. Vẫn còn một khoảng gap:
+
+```
+Timeline deploy 1 service:
+
+t=0s      POST OUT_OF_SERVICE → Eureka
+t=0-45s   Gateway vẫn có thể route đến service cũ (cache chưa sync)
+t=45s     docker stop (graceful shutdown 30s)
+t=75s     Container cũ tắt hoàn toàn
+t=75s     docker compose up (container mới bắt đầu khởi động)
+t=75-135s Spring Boot startup (30-60s)
+t=135s    Container mới UP, đăng ký Eureka
+t=135-180s Gateway đồng bộ cache, bắt đầu route đến container mới
+
+⚡ Window gap: ~75s đến ~135s (khoảng 1 phút)
+   Trong khoảng này, không có instance nào phục vụ
+```
+
+Với hệ thống nội bộ (không phải e-commerce), 1-2 phút micro-downtime per service deployment là chấp nhận được, đặc biệt khi deploy vào khung giờ thấp điểm (sau 23:00).
+
+## Khi nào cần Blue-Green thực sự?
+
+| Tình huống | Rolling Update đủ? | Cần Blue-Green? |
+|-----------|---------------------|-----------------|
+| Hệ thống nội bộ, deploy ngoài giờ | ✅ | Không |
+| E-commerce, 24/7 traffic | ❌ | ✅ |
+| API Gateway (entry point) | ⚠️ | ✅ Nên có |
+| Backend service ít traffic | ✅ | Không |
+| Cần rollback tức thì | ❌ | ✅ |
+
+## Tổng kết
+
+Triển khai Zero-Downtime trên một VPS duy nhất là bài toán cân bằng giữa lý tưởng và thực tế.
+
+Blue-Green chuẩn cho Zero-Downtime tuyệt đối, nhưng gặp bài toán xung đột port khi dùng host network và tốn gấp đôi RAM. Rolling Update + Eureka là giải pháp thực tế hơn, tận dụng Graceful Shutdown và Service Registry để giảm downtime xuống còn khoảng 1-2 phút. Còn kết hợp cả hai, Blue-Green cho Gateway và Rolling Update cho backend, là phương án mình thấy tối ưu nhất trên single VPS.
+
+Dù chọn chiến lược nào, bạn cần đảm bảo có:
+
+- Health check để biết service đã sẵn sàng.
+- Graceful shutdown để không cắt ngang request đang xử lý.
+- Thông báo tự động (Email/Telegram) để biết deploy thành công hay thất bại.
+- CI/CD pipeline (GitHub Actions) để tự động hóa toàn bộ quy trình.
+
+Đôi khi "near-zero downtime" đã là đủ tốt, miễn là bạn biết rõ gap ở đâu và chấp nhận được nó.

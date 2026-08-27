@@ -8,6 +8,7 @@ const theme = merge(originalTheme, {
   colors: {
     primary: `var(--color-accent)`,
     text: `var(--color-foreground)`,
+    secondary: `var(--color-foreground-muted)`,
     background: `var(--color-background)`,
     heading: `var(--color-foreground)`,
     divide: `var(--color-background-tinted)`,
@@ -17,6 +18,7 @@ const theme = merge(originalTheme, {
       dark: {
         primary: `var(--color-accent)`,
         text: `var(--color-foreground)`,
+        secondary: `var(--color-foreground-muted)`,
         background: `var(--color-background)`,
         heading: `var(--color-foreground)`,
         divide: `var(--color-background-tinted)`,
@@ -26,8 +28,17 @@ const theme = merge(originalTheme, {
     },
   },
   fonts: {
-    body: `-apple-system, BlinkMacSystemFont, "avenir next", avenir, "helvetica neue", helvetica, Ubuntu, roboto, noto, "segoe ui", arial, sans-serif`,
-    heading: `-apple-system, BlinkMacSystemFont, "avenir next", avenir, "helvetica neue", helvetica, Ubuntu, roboto, noto, "segoe ui", arial, sans-serif`,
+    body: `'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+    heading: `'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+  },
+  fontWeights: {
+    body: 400,
+    heading: 700,
+    bold: 700,
+  },
+  lineHeights: {
+    body: 1.7,
+    heading: 1.2,
   },
 })
 

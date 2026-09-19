@@ -1,0 +1,283 @@
+---
+title: "Hướng Dẫn Gửi Email Bằng Gmail Trong Spring Boot / Spring MVC (Từ A Đến Z)"
+date: 2026-08-28
+description: "Hướng dẫn cấu hình Spring Boot Starter Mail kết hợp Gmail SMTP để gửi email dạng văn bản, email giao diện HTML chuyên nghiệp và email đính kèm tệp tin."
+tags:
+  - Spring Boot
+  - Java
+  - Gmail
+  - Spring MVC
+  - Email
+slug: "/guide-send-email-gmail-spring-boot"
+---
+
+Trong hầu hết các ứng dụng web hiện nay, tính năng gửi email đóng vai trò thiết yếu: từ việc gửi mã OTP đăng ký, link kích hoạt tài khoản, thông báo đặt hàng thành công cho đến khôi phục mật khẩu.
+
+Hệ sinh thái Spring cung cấp module `spring-boot-starter-mail` (dựa trên nền tảng **JavaMail API** / **Jakarta Mail**) giúp việc tích hợp và cấu hình SMTP trở nên vô cùng đơn giản. Trong bài viết này, chúng ta sẽ cùng tìm hiểu cách cấu hình và triển khai gửi email qua tài khoản **Gmail** chi tiết từ A đến Z.
+
+---
+
+## 1. Chuẩn bị tài khoản Gmail & Tạo App Password
+
+> ⚠️ **Lưu ý quan trọng:** Google đã chính thức tắt tính năng *"Cho phép ứng dụng kém an toàn" (Less secure apps)*. Do đó, bạn **không thể** sử dụng mật khẩu đăng nhập Gmail trực tiếp. Thay vào đó, bạn phải tạo **Mật khẩu ứng dụng (App Password)**:
+
+1. Đăng nhập vào [Google Account](https://myaccount.google.com/).
+2. Chọn menu **Bảo mật (Security)**.
+3. Đảm bảo tính năng **Xác minh 2 bước (2-Step Verification)** đã được **BẬT**.
+4. Tìm kiếm mục **Mật khẩu ứng dụng (App passwords)** (hoặc truy cập trực tiếp: `https://myaccount.google.com/apppasswords`).
+5. Điền tên ứng dụng (ví dụ: `SpringBootApp`) và bấm **Tạo (Create)**.
+6. Google sẽ cung cấp một chuỗi ký tự gồm 16 chữ cái (ví dụ: `abcd efgh ijkl mnop`). Lưu lại chuỗi này để cấu hình vào ứng dụng.
+
+---
+
+## 2. Thêm Dependency
+
+Thêm thư viện `spring-boot-starter-mail` vào file quản lý phụ thuộc của dự án:
+
+### Với Maven (`pom.xml`)
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+```
+
+### Với Gradle (`build.gradle`)
+
+```groovy
+implementation 'org.springframework.boot:spring-boot-starter-mail'
+```
+
+---
+
+## 3. Cấu hình SMTP Gmail trong `application.yml` / `application.properties`
+
+Thêm cấu hình kết nối SMTP Server của Google:
+
+### `application.yml`
+
+```yaml
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    # Khuyến nghị lấy từ biến môi trường: ${MAIL_PASSWORD}
+    password: abcd efgh ijkl mnop # Mật khẩu ứng dụng 16 ký tự vừa tạo
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+```
+
+### Hoặc `application.properties`
+
+```properties
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your-email@gmail.com
+spring.mail.password=abcd efgh ijkl mnop
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+spring.mail.properties.mail.smtp.writetimeout=5000
+```
+
+---
+
+## 4. Xây dựng Email Service
+
+Spring Boot sẽ tự động cấu hình và tạo Bean `JavaMailSender`. Chúng ta chỉ cần `@Autowired` (hoặc inject qua constructor) để sử dụng.
+
+### Định nghĩa `EmailService.java`
+
+```java
+package com.example.emaildemo.service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+
+@Service
+public class EmailService {
+
+    private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.username}")
+    private String senderEmail;
+
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    /**
+     * 1. Gửi email văn bản đơn giản (Plain Text)
+     */
+    public void sendSimpleEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(senderEmail);
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+
+        mailSender.send(message);
+    }
+
+    /**
+     * 2. Gửi email định dạng HTML phong phú
+     */
+    public void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        
+        // true: multipart mode hỗ trợ HTML và đính kèm
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        
+        helper.setFrom(senderEmail);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlContent, true); // true = isHtml
+
+        mailSender.send(message);
+    }
+
+    /**
+     * 3. Gửi email kèm tệp đính kèm (Attachment)
+     */
+    public void sendEmailWithAttachment(String to, String subject, String body, String attachmentPath) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setFrom(senderEmail);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body);
+
+        // Đính kèm tệp tin
+        FileSystemResource file = new FileSystemResource(new File(attachmentPath));
+        if (file.exists()) {
+            helper.addAttachment(file.getFilename(), file);
+        }
+
+        mailSender.send(message);
+    }
+}
+```
+
+---
+
+## 5. Tạo Controller để thử nghiệm
+
+Tạo một `RestController` đơn giản để kích hoạt gửi email qua HTTP request:
+
+```java
+package com.example.emaildemo.controller;
+
+import com.example.emaildemo.service.EmailService;
+import jakarta.mail.MessagingException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/emails")
+public class EmailController {
+
+    private final EmailService emailService;
+
+    public EmailController(EmailService emailService) {
+        this.emailService = emailService;
+    }
+
+    @PostMapping("/send-simple")
+    public ResponseEntity<String> sendSimpleEmail(@RequestParam String to) {
+        emailService.sendSimpleEmail(
+                to,
+                "Chào mừng bạn đến với ứng dụng!",
+                "Cảm ơn bạn đã đăng ký tài khoản thành công."
+        );
+        return ResponseEntity.ok("Gửi email thành công!");
+    }
+
+    @PostMapping("/send-html")
+    public ResponseEntity<String> sendHtmlEmail(@RequestParam String to) throws MessagingException {
+        String html = """
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                    <h2 style="color: #2563eb;">Xác thực tài khoản của bạn</h2>
+                    <p>Xin chào,</p>
+                    <p>Mã OTP xác thực của bạn là: <strong style="font-size: 20px; color: #dc2626;">892145</strong></p>
+                    <p>Mã này có hiệu lực trong vòng 5 phút.</p>
+                    <hr/>
+                    <small style="color: #6b7280;">Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.</small>
+                </div>
+                """;
+
+        emailService.sendHtmlEmail(to, "Mã xác thực OTP đăng ký", html);
+        return ResponseEntity.ok("Gửi email HTML thành công!");
+    }
+}
+```
+
+---
+
+## 6. Các kinh nghiệm thực chiến (Best Practices)
+
+### 1. Gửi Email bất đồng bộ (`@Async`)
+Quá trình kết nối và gửi thư qua SMTP thường mất từ **1 - 3 giây**. Nếu chạy đồng bộ (synchronous), client sẽ phải chờ đợi lâu, làm giảm trải nghiệm người dùng.
+
+Để chạy bất đồng bộ:
+1. Thêm annotation `@EnableAsync` tại class Application chính:
+   ```java
+   @SpringBootApplication
+   @EnableAsync
+   public class Application { ... }
+   ```
+2. Thêm `@Async` vào phương thức gửi thư trong `EmailService`:
+   ```java
+   @Async
+   public void sendSimpleEmail(String to, String subject, String body) {
+       // Code gửi thư...
+   }
+   ```
+
+### 2. Bảo mật thông tin cấu hình
+Tuyệt đối **không commit** App Password lên Git repository công khai. Hãy dùng biến môi trường:
+```bash
+export MAIL_USERNAME="your-email@gmail.com"
+export MAIL_PASSWORD="your-16-char-app-password"
+```
+Và tham chiếu trong `application.yml`:
+```yaml
+spring:
+  mail:
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+```
+
+### 3. Giới hạn (Quota) của Gmail
+- Tài khoản Gmail cá nhân miễn phí bị giới hạn khoảng **500 emails/ngày**.
+- Tài khoản Google Workspace hỗ trợ lên đến **2.000 emails/ngày**.
+- Đối với hệ thống Production quy mô lớn, bạn nên cân nhắc chuyển sang các dịch vụ Transactional Email chuyên dụng như **Amazon SES**, **SendGrid**, **Resend**, hoặc **Mailgun**.
+
+---
+
+## Tổng kết
+
+Chỉ với vài bước cấu hình đơn giản cùng thư viện `spring-boot-starter-mail`, bạn đã có thể xây dựng tính năng gửi email hoàn chỉnh và bảo mật cho ứng dụng Spring Boot / Spring MVC của mình.
+
+Chúc bạn thực hiện thành công!

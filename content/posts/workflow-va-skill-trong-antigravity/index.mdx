@@ -1,7 +1,7 @@
 ---
 title: "Workflow và Skill trong Antigravity khác nhau thế nào?"
 date: 2026-09-22
-description: "Phân biệt workflow và skill trong Antigravity: vì sao Workflows bị deprecated vào 01/11/2026, ưu thế của Skills và hướng dẫn chuyển đổi tối ưu token."
+description: "Phân biệt workflow, rules và skill trong Antigravity: vì sao Workflows bị deprecated vào 01/11/2026, vai trò của .agents/rules và ưu thế của Skills."
 slug: "workflow-va-skill-trong-antigravity"
 tags:
   - ai
@@ -17,12 +17,12 @@ Tối qua trong buổi dạy khóa Vibe Coding, lúc giải thích hai khái ni�
 
 Đêm về xem lại video record buổi học, mình càng thấy phần giải thích của mình lúc đó chưa thực sự thuyết phục và gãy gọn. Thế là mình quyết định lục lại kỹ tài liệu chính thức của Google Antigravity và các bài thực hành trên Google Codelabs để "chữa cháy" một chút. Và câu trả lời bất ngờ nằm ở một thông báo quan trọng: **Workflows thực chất là định dạng cũ (legacy) đã bị phản đối (deprecated) và sẽ chính thức ngừng hoạt động vào ngày 1 tháng 11 năm 2026, nhường chỗ hoàn toàn cho tiêu chuẩn Agent Skills hiện đại hơn**.
 
-Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity và quy trình [Spec-Driven Development (SDD)](/spec-driven-development/), mình viết bài này để làm rõ tường tận bản chất của sự thay đổi này và lộ trình chuyển đổi tối ưu nhất cho bạn.
+Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity và quy trình [Spec-Driven Development (SDD)](/spec-driven-development/), mình viết bài này để làm rõ tường tận bản chất của sự thay đổi này, vai trò của thư mục Rules và lộ trình chuyển đổi tối ưu nhất cho bạn.
 
 > **Tóm tắt cốt lõi (TL;DR):**
 > - **Thông báo quan trọng từ Google:** Theo tài liệu chính thức [Migration: Workflows to Skills](https://antigravity.google/docs/migration/workflows-to-skills), **Workflows** là định dạng cũ (chỉ gồm 1 tệp Markdown duy nhất), hiện đã bị **deprecated** và sẽ **ngừng hoạt động hoàn toàn từ ngày 01/11/2026**.
-> - **Bản chất khác biệt:** Sở dĩ bạn thấy "kết quả giống nhau" vì Skills chính là phiên bản tiến hóa kế thừa Workflows. Tuy nhiên, **Skills (Agent Skills)** được tổ chức dưới dạng **thư mục hoàn chỉnh** (gồm `SKILL.md`, `scripts/`, `references/`), tuân theo chuẩn hệ sinh thái mở và tối ưu hóa việc nạp dữ liệu ngữ cảnh (Progressive Disclosure).
-> - **Cơ chế vận hành:** Workflows trước đây chủ yếu dựa vào việc con người gõ Slash Command. Trong khi đó, Skills cho phép Agent **tự động kích hoạt thông minh** dựa trên mô tả ngữ cảnh, đồng thời chạy thẳng các đoạn script có sẵn với tham số động thay vì bắt AI sinh lại code từ đầu.
+> - **Cùng là tệp `.md` nhưng khác nhau thế nào?** Cả **Workflows cũ** (`workflows/*.md`) và **Rules** (`GEMINI.md`, `.agents/rules/*.md`) đều là các tệp Markdown đơn lẻ. Nhưng Rules đóng vai trò **rào chắn thụ động (Guardrails)** kiểm soát an toàn, còn Skills là một **thư mục đóng gói (Folder/Package)** gồm `SKILL.md` kèm mã thực thi trong `scripts/` để giải quyết triệt để bài toán tự động hóa.
+> - **Cơ chế vận hành:** Workflows trước đây do con người gõ lệnh thủ công. Skills thế hệ mới cho phép Agent **tự động kích hoạt thông minh** theo ngữ cảnh (*Progressive Disclosure*), tận dụng script có sẵn với tham số động thay vì bắt AI sinh lại mã từ đầu.
 
 ---
 
@@ -32,11 +32,12 @@ Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity v
 2. [Thông báo quan trọng: Workflows chính thức bị khai tử vào 01/11/2026](#2-thong-bao-quan-trong-workflows-chinh-thuc-bi-khai-tu-vao-01112026)
 3. [Khác biệt 1: Cơ chế kích hoạt — Human-in-the-loop vs Autonomous Agent](#3-khac-biet-1-co-che-kich-hoat--human-in-the-loop-vs-autonomous-agent)
 4. [Khác biệt 2: Cấu trúc thư mục và kinh tế học Token](#4-khac-biet-2-cau-truc-thu-muc-va-kinh-te-hoc-token)
-5. [Bảng so sánh chi tiết: Legacy Workflows vs Agent Skills](#5-bang-so-sanh-chi-tiet-legacy-workflows-vs-agent-skills)
-6. [Mô hình phối hợp mới: Rules và Skills trong Antigravity](#6-mo-hinh-phoi-hop-moi-rules-va-skills-trong-antigravity)
-7. [Hướng dẫn chuyển đổi (Migration Guide): Từ Workflow cũ sang Skill](#7-huong-dan-chuyen-doi-migration-guide-tu-workflow-cu-sang-skill)
-8. [Những câu hỏi thường gặp (FAQ)](#8-nhung-cau-hoi-thuong-gap-faq)
-9. [Lời kết](#9-loi-ket)
+5. [Khoan đã: Rules trong thư mục .agents/rules cũng là file .md thì sao?](#5-khoan-da-rules-trong-thu-muc-agentsrules-cung-la-file-md-thi-sao)
+6. [Bảng so sánh chi tiết: Rules vs Legacy Workflows vs Agent Skills](#6-bang-so-sanh-chi-tiet-rules-vs-legacy-workflows-vs-agent-skills)
+7. [Mô hình phối hợp mới: Rules và Skills trong Antigravity](#7-mo-hinh-phoi-hop-moi-rules-va-skills-trong-antigravity)
+8. [Hướng dẫn chuyển đổi (Migration Guide): Từ Workflow cũ sang Skill](#8-huong-dan-chuyen-doi-migration-guide-tu-workflow-cu-sang-skill)
+9. [Những câu hỏi thường gặp (FAQ)](#9-nhung-cau-hoi-thuong-gap-faq)
+10. [Lời kết](#10-loi-ket)
 
 ---
 
@@ -44,25 +45,25 @@ Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity v
 
 Khi mới tiếp xúc với Google Antigravity, rất nhiều lập trình viên rơi vào cảm giác bối rối: *"Tại sao vừa có Rules, vừa có Workflows, lại vừa có Skills?"*. 
 
-Thực tế, hệ thống tùy biến của Antigravity đã trải qua một giai đoạn chuyển giao kiến trúc:
+Thực tế, hệ thống tùy biến của Antigravity đã trải qua một giai đoạn chuyển giao kiến trúc quan trọng:
 
 - **Giai đoạn đầu (Legacy Architecture):** Antigravity sử dụng các file `.md` đơn lẻ đặt trong `.agents/workflows/` (hoặc `.agent/workflows/`). Mỗi khi cần chạy một quy trình, lập trình viên gõ Slash Command `/ten-workflow`.
 - **Giai đoạn hiện tại (Modern Agentic Standard):** Nhận thấy hạn chế của các file markdown rời rạc, Google đã nâng cấp toàn bộ hệ thống sang **Agent Skills** đặt trong `.agents/skills/<name>/`. Đây không chỉ là một tài liệu hướng dẫn, mà là một gói công cụ độc lập (Modular Package).
 
 ```mermaid
 flowchart LR
-    subgraph Legacy [Định dạng cũ - Sắp dừng hoạt động]
-        WF[1 File Markdown đơn lẻ<br/>.agents/workflows/*.md]
+    subgraph Legacy ["Định dạng cũ (Legacy)"]
+        WF["Workflows<br/>.agents/workflows/*.md<br/>(1 File Markdown đơn lẻ)"]
     end
 
-    subgraph Modern [Tiêu chuẩn hiện đại - Agent Skills]
-        SK[Thư mục Modular Package<br/>.agents/skills/<name>/]
-        SK --> MD[SKILL.md: Hướng dẫn & Metadata]
-        SK --> SC[scripts/: Mã thực thi trực tiếp]
-        SK --> RF[references/: Tài liệu tra cứu mở rộng]
+    subgraph Modern ["Tiêu chuẩn mới (Agent Skills)"]
+        SK["Skills<br/>.agents/skills/<name>/<br/>(Thư mục Module hoàn chỉnh)"]
+        SK --> MD["SKILL.md<br/>(Hướng dẫn & Metadata)"]
+        SK --> SC["scripts/<br/>(Mã thực thi trực tiếp)"]
+        SK --> RF["references/<br/>(Tài liệu tra cứu mở rộng)"]
     end
 
-    Legacy -->|Chính thức Deprecated<br/>Deadline: 01/11/2026| Modern
+    Legacy -->|"Chính thức Deprecated<br/>Hạn chót: 01/11/2026"| Modern
 ```
 
 ---
@@ -94,6 +95,21 @@ Sự khác biệt rõ nét nhất trong trải nghiệm hàng ngày nằm ở vi
 - **Tối ưu ngữ cảnh:** Khi khởi động, Antigravity **chỉ nạp danh sách tên và mô tả ngắn gọn** của các skills vào bộ nhớ (Progressive Disclosure). Cửa sổ ngữ cảnh (Context Window) không hề bị chiếm dụng lãng phí.
 - **Kích hoạt tự động:** Trong quá trình thực thi, khi bạn đưa ra yêu cầu (hoặc khi agent nhận diện được dữ liệu từ task trước đó), agent sẽ tự quét mô tả: *"Nhiệm vụ này khớp với kỹ năng nào?"*. Nếu khớp, agent sẽ **tự động nạp chi tiết file SKILL.md** để xử lý.
 - Dĩ nhiên, nếu muốn, bạn vẫn có thể chủ động gọi skill bằng cách `@ten-skill` hoặc dùng Slash Command tương ứng nếu skill đó được cấu hình hỗ trợ.
+
+```mermaid
+flowchart TD
+    subgraph HumanTrigger ["1. Kích hoạt bởi Con người (Human-driven)"]
+        U["Lập trình viên"] -->|"Gõ lệnh Slash Command<br/>(/publish-blog, /deploy)"| WF_FLOW["Workflow / Nhiệm vụ tổng thể"]
+    end
+
+    subgraph AgentTrigger ["2. Tự động kích hoạt (Autonomous Agent-driven)"]
+        TASK["Yêu cầu công việc / Dữ liệu ngữ cảnh"] --> SCAN{"Agent quét mô tả<br/>YAML frontmatter description"}
+        SCAN -->|"Khớp từ khóa & mục tiêu"| LOAD["Tự động tải SKILL.md<br/>(Progressive Disclosure)"]
+        LOAD --> RUN["Thực thi script trong scripts/<br/>với tham số động"]
+    end
+
+    WF_FLOW -.->|"Cung cấp ngữ cảnh đầu vào"| TASK
+```
 
 ---
 
@@ -131,50 +147,76 @@ Nhờ cấu trúc này:
 
 ---
 
-## 5. Bảng so sánh chi tiết: Legacy Workflows vs Agent Skills
+## 5. Khoan đã: Rules trong thư mục .agents/rules cũng là file .md thì sao?
 
-| Tiêu chí so sánh | Workflows (Định dạng cũ) | Agent Skills (Tiêu chuẩn mới) |
-| :--- | :--- | :--- |
-| **Trạng thái hỗ trợ** | **Deprecated** (Ngừng hoạt động 01/11/2026) | **Active & Recommended** (Tiêu chuẩn dài hạn) |
-| **Cấu trúc lưu trữ** | 1 file Markdown đơn lẻ (`workflows/*.md`) | Thư mục trọn gói (`SKILL.md`, `scripts/`, `references/`) |
-| **Cơ chế kích hoạt** | Con người gõ Slash Command thủ công | Agent tự động nhận diện theo ngữ cảnh hoặc con người gọi |
-| **Quản lý Context Window** | Dễ gây tràn bộ nhớ nếu file dài | **Progressive Disclosure** (chỉ tải sâu khi cần) |
-| **Khả năng chạy mã** | Phải yêu cầu AI tự sinh script tạm thời | Tích hợp sẵn executable scripts chạy với tham số động |
-| **Tiêu hao Token** | Cao (do phải sinh code lặp đi lặp lại) | Rất thấp (chỉ truyền tham số vào script có sẵn) |
-| **Chuẩn hệ sinh thái** | Nội bộ, đóng kín | Hệ sinh thái mở, dễ chia sẻ giữa các AI IDE |
+Nhiều bạn sẽ đặt câu hỏi rất sắc bén: *"Ủa anh ơi, trong Antigravity có thư mục `.agents/rules/` chứa các tệp như `code-style.md`, `git.md`, `security.md`. Chúng cũng chỉ là 1 tệp Markdown đơn lẻ y hệt như Workflow cũ, tại sao Rules không bị khai tử mà Workflows lại bị?"*
+
+Câu hỏi này chạm đúng vào bản chất thiết kế hệ thống của Antigravity:
+
+### 1. Bản chất của Rules là "Hàng rào thụ động" (Passive Constraints)
+- Thư mục `.agents/rules/*.md` (cùng các tệp gốc `GEMINI.md`, `AGENTS.md`) được sinh ra để định hình **ranh giới hành vi**: quy ước đặt tên biến, kiến trúc dự án, điều cấm kỵ (do's & don'ts), phong cách giao tiếp.
+- Rules **không phải là quy trình hành động nhiều bước**. Nó không đòi hỏi agent phải chạy script hay truyền tham số động. Agent chỉ cần đọc và ghi nhớ các quy tắc này trong bộ nhớ để không làm sai.
+- Do đó, định dạng **1 tệp Markdown đơn lẻ** là lựa chọn hoàn hảo nhất cho Rules: nhẹ nhàng, dễ đọc, dễ quản lý theo từng module (`rules/backend.md`, `rules/frontend.md`).
+
+### 2. Bản chất của Workflows là "Hành động chủ động" (Active Action Execution)
+- Ngược lại, Workflow lại gánh vác trách nhiệm thực thi một quy trình công việc cụ thể (SOP) với các bước kiểm tra, biên dịch, xử lý dữ liệu.
+- Việc nhét một quy trình thực thi phức tạp vào một tệp Markdown đơn lẻ khiến AI bị "trói tay trói chân": không có công cụ thực thi đính kèm, buộc phải tự sinh code tạm thời dẫn đến lãng phí token và thiếu ổn định.
+- Vì thế, việc thực thi hành động **bắt buộc phải nâng cấp lên Skills** (dạng thư mục module), trong khi việc đặt rào chắn luật lệ **vẫn tiếp tục duy trì ở Rules** (`.agents/rules/*.md`).
 
 ---
 
-## 6. Mô hình phối hợp mới: Rules và Skills trong Antigravity
+## 6. Bảng so sánh chi tiết: Rules vs Legacy Workflows vs Agent Skills
 
-Sau khi Workflows bị loại bỏ, kiến trúc tùy biến trong Antigravity sẽ trở nên tinh gọn và mạch lạc hơn rất nhiều với mô hình **Rules + Skills**:
+| Tiêu chí so sánh | Rules (`.agents/rules/*.md`) | Legacy Workflows (`workflows/*.md`) | Agent Skills (`skills/<name>/`) |
+| :--- | :--- | :--- | :--- |
+| **Bản chất cốt lõi** | Rào chắn & Quy tắc kỷ luật (Guardrails) | Quy trình điều phối từng bước (SOP) | Hộp đồ nghề tri thức & mã thực thi |
+| **Trạng thái hỗ trợ** | **Active & Khuyến nghị** | **Deprecated** (Dừng 01/11/2026) | **Active & Tiêu chuẩn mới** |
+| **Cấu trúc lưu trữ** | 1 tệp `.md` theo chủ đề hoặc `GEMINI.md` | 1 tệp `.md` đơn lẻ | Thư mục gồm `SKILL.md` + `scripts/` + `references/` |
+| **Cơ chế nạp** | Tải nền tự động theo ngữ cảnh / Always-on | Tải toàn bộ khi gõ Slash Command | **Progressive Disclosure** (chỉ nạp sâu khi khớp việc) |
+| **Khả năng chạy mã** | Không (chỉ là quy chuẩn tĩnh) | Phải tự sinh mã tạm thời từ đầu | Gọi trực tiếp executable scripts với tham số động |
+| **Mục đích tối thượng** | Giữ Agent **"không trật đường ray"** | Dẫn dắt quy trình (cách làm cũ) | Giải quyết bài toán **"nhanh, chuẩn, ít tốn token"** |
 
-```text
-     ┌────────────────────────────────────────────────────────┐
-     │                  RULES (GEMINI.md)                     │
-     │      - Ranh giới bảo mật & phong cách code             │
-     │      - Luôn chạy nền để giữ Agent "đúng đường ray"     │
-     └──────────────────────────┬─────────────────────────────┘
-                                │ Giám sát & Đặt rào chắn
-                                v
-     ┌────────────────────────────────────────────────────────┐
-     │              AGENT SKILLS (skills/<name>/)             │
-     │      - Đóng gói tri thức chuyên môn từng domain        │
-     │      - Kèm mã thực thi (scripts/) và tài liệu sâu      │
-     │      - Tự kích hoạt đúng lúc, tiết kiệm tối đa token   │
-     └────────────────────────────────────────────────────────┘
+---
+
+## 7. Mô hình phối hợp mới: Rules và Skills trong Antigravity
+
+Sau khi Workflows chính thức khép lại sứ mệnh vào ngày 01/11/2026, kiến trúc tùy biến trong Antigravity sẽ trở nên cực kỳ tinh gọn và rõ ràng với mô hình **Rules + Skills**:
+
+```mermaid
+flowchart TD
+    DEV["Lập trình viên (Developer)"] -->|"Giao nhiệm vụ hoặc gõ Slash Command"| AGENT{"Google Antigravity Agent"}
+
+    subgraph Guardrails ["HÀNG RÀO KIỂM SOÁT (RULES)"]
+        R1["GEMINI.md / AGENTS.md<br/>(Quy tắc toàn cục)"]
+        R2[".agents/rules/*.md<br/>(Quy tắc module: code-style, git, security)"]
+    end
+
+    subgraph Toolkit ["HỘP ĐỒ NGHỀ THỰC THI (AGENT SKILLS)"]
+        S1["SKILL.md<br/>(Quy trình từng bước)"]
+        S2["scripts/<br/>(Code chạy sẵn với tham số động)"]
+        S3["references/<br/>(Tài liệu sâu nạp khi cần)"]
+    end
+
+    Guardrails -.->|"Áp đặt ranh giới Do & Don't<br/>(Giữ không bao giờ đi chệch hướng)"| AGENT
+    AGENT -->|"Tự kích hoạt & rút công cụ phù hợp"| Toolkit
+    Toolkit -->|"Thực thi chính xác, tiết kiệm token"| OUTPUT["Mã nguồn & Hệ thống hoàn tất"]
 ```
 
-1. **Rules (`GEMINI.md`, `AGENTS.md`):** Đóng vai trò là "hiến pháp" và rào chắn an toàn (guardrails). Rules quy định những điều cấm kỵ (do & don't), quy ước đặt tên, văn phong giao tiếp và chuẩn kiến trúc.
-2. **Skills (`.agents/skills/`):** Đóng vai trò là "hộp đồ nghề vạn năng". Mỗi khi agent đối mặt với một bài toán cụ thể (audit SEO, refactor component, kiểm tra accessibility), nó tự động rút đúng skill tương ứng ra để xử lý trong phạm vi cho phép của Rules.
-
-Sự kết hợp này giúp hệ thống của bạn vừa tuân thủ kỷ luật nghiêm ngặt, vừa có sức mạnh giải quyết vấn đề linh hoạt và tối ưu chi phí.
+1. **Rules (`GEMINI.md`, `AGENTS.md`, `.agents/rules/*.md`):** Là "hiến pháp" và rào chắn an toàn. Rules quy định những điều cấm kỵ, quy ước đặt tên, chuẩn bảo mật và phong cách làm việc.
+2. **Skills (`.agents/skills/`):** Là "hộp đồ nghề vạn năng". Mỗi khi agent đối mặt với một bài toán cụ thể (audit SEO, kiểm thử component, nén tài nguyên), nó tự động rút đúng skill ra để xử lý nhanh gọn và chuẩn xác.
 
 ---
 
-## 7. Hướng dẫn chuyển đổi (Migration Guide): Từ Workflow cũ sang Skill
+## 8. Hướng dẫn chuyển đổi (Migration Guide): Từ Workflow cũ sang Skill
 
-Nếu dự án của bạn vẫn còn các file trong `.agents/workflows/`, hãy làm theo 4 bước sau để hoàn tất việc di trú trước ngày 01/11/2026:
+Nếu dự án của bạn vẫn còn các file trong `.agents/workflows/`, bạn nên chuyển đổi sớm sang Agent Skills theo quy trình 4 bước chuẩn hóa:
+
+```mermaid
+flowchart LR
+    S1["Bước 1: Tạo thư mục<br/>.agents/skills/<name>/"] --> S2["Bước 2: Viết SKILL.md<br/>Thêm YAML frontmatter"]
+    S2 --> S3["Bước 3: Tách Scripts<br/>Lưu vào scripts/"]
+    S3 --> S4["Bước 4: Dọn dẹp<br/>Xóa workflow cũ trước 01/11/2026"]
+```
 
 ### Bước 1: Tạo thư mục Skill tương ứng
 Với mỗi workflow cũ (ví dụ `seo-checker.md`), tạo một thư mục mới:
@@ -207,30 +249,28 @@ Nếu trong workflow cũ có những đoạn code Python, Bash hay Node.js mà a
 Trong `SKILL.md`, chỉ cần hướng dẫn agent gọi file script kèm tham số đầu vào.
 
 ### Bước 4: Xóa bỏ workflow cũ
-Sau khi kiểm tra skill mới hoạt động ổn định, bạn có thể xóa file markdown cũ trong thư mục `workflows/` để tránh xung đột định danh.
+Sau khi kiểm tra skill mới hoạt động ổn định, bạn có thể xóa file markdown cũ trong thư mục `workflows/` để tránh xung đột định danh trước khi tính năng này ngừng hoạt động hoàn toàn vào 01/11/2026.
 
 ---
 
-## 8. Những câu hỏi thường gặp (FAQ)
+## 9. Những câu hỏi thường gặp (FAQ)
 
 ### Sau ngày 01/11/2026, các Slash Command có bị mất không?
 Không. Các Slash Command vẫn tồn tại, nhưng cơ chế nền bên dưới sẽ liên kết trực tiếp tới các Skill tương ứng thay vì đọc từ file workflow legacy.
 
-### Nếu tôi chỉ cần một hướng dẫn đơn giản không có script, có bắt buộc phải tạo folder Skill không?
-Có. Theo tiêu chuẩn mới của Antigravity, mọi kỹ năng đều phải nằm trong thư mục `skills/<name>/SKILL.md`. Dù bạn không dùng thư mục `scripts/` hay `references/`, cấu trúc này vẫn bắt buộc để hệ thống quản lý siêu dữ liệu (metadata) và hỗ trợ cơ chế Progressive Disclosure.
+### Thư mục `.agents/rules/` có bị khai tử không?
+Hoàn toàn không. Rules trong `.agents/rules/*.md` là một phần cốt lõi trong hệ thống phân tầng của Antigravity để kiểm soát hành vi agent. Chỉ có Workflows (1 tệp markdown mô tả quy trình thực thi) mới bị thay thế bởi Skills.
 
-### Làm sao để biết Agent có đang kích hoạt đúng Skill không?
-Trong Antigravity IDE, khi một skill được kích hoạt, thanh trạng thái hoặc lịch sử suy luận của agent sẽ hiển thị thông báo tải skill tương ứng. Bạn cũng có thể chủ động gõ `@ten-skill` vào prompt nếu muốn ép buộc agent dùng ngay kỹ năng đó.
+### Nếu tôi chỉ cần một kỹ năng đơn giản không có script, có bắt buộc phải tạo folder Skill không?
+Có. Theo tiêu chuẩn mới của Antigravity, mọi kỹ năng đều phải nằm trong thư mục `skills/<name>/SKILL.md`. Dù bạn chưa dùng thư mục `scripts/` hay `references/`, cấu trúc này vẫn bắt buộc để hệ thống quản lý siêu dữ liệu (metadata) và hỗ trợ cơ chế Progressive Disclosure.
 
 ---
 
-## 9. Lời kết
+## 10. Lời kết
 
 Việc Google Antigravity chính thức loại bỏ **Workflows** để chuyển dịch hoàn toàn sang **Agent Skills** trước ngày 01/11/2026 không phải là sự "vẽ chuyện rườm rà", mà là một bước chuyển mình tất yếu của kỹ thuật công nghệ đại lý AI (Agentic Engineering).
 
-Chuyển đổi từ các file Markdown rời rạc sang các module kỹ năng có thể thực thi giúp chúng ta:
-- Kiểm soát ngữ cảnh thông minh hơn (không lo tràn Context Window).
-- Tiết kiệm token và chi phí API một cách rõ rệt.
-- Xây dựng kho công cụ tái sử dụng bền vững, chuẩn hóa theo hệ sinh thái mở.
+- **Rules (`.agents/rules/*.md`):** Đặt ra kỷ luật thép để Agent không bao giờ đi chệch hướng.
+- **Skills (`.agents/skills/<name>/`):** Cung cấp bộ công cụ sắc bén với script thực thi có sẵn, tối ưu hóa triệt để tài nguyên token và thời gian xử lý.
 
-Nếu bạn đang xây dựng [Second Brain với LLM](/xay-dung-second-brain-voi-llm/) hoặc quản lý các dự án phức tạp với Antigravity, hãy bắt tay vào việc chuẩn hóa các kỹ năng của bạn sang Agent Skills ngay hôm nay!
+Khi bạn hiểu rõ kiến trúc này và áp dụng vào việc xây dựng [Second Brain với LLM](/xay-dung-second-brain-voi-llm/) hay tự động hóa lập trình hàng ngày, trợ lý AI sẽ thực sự trở thành một người cộng sự tin cậy và ăn ý nhất.

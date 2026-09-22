@@ -13,11 +13,11 @@ tags:
 
 Hiểu rõ sự khác biệt giữa **workflow và skill trong Antigravity** là chìa khóa giúp bạn làm chủ trợ lý AI, thay vì để nó liên tục sinh mã tùy tiện và ngốn hàng nghìn token không cần thiết.
 
-Hôm trước ngồi cà phê với một người bạn, bạn ấy hỏi mình một câu rất chân thật: *"Em thấy gõ lệnh chạy workflow hay để agent tự gọi skill thì kết quả cuối cùng nó cũng sinh code, cũng sửa file y chang nhau. Chẳng thấy khác gì, tại sao Google Antigravity phải tách ra hai khái niệm cho mất công vậy anh?"*
+Tối qua trong buổi dạy khóa Vibe Coding, lúc giải thích hai khái niệm Workflow và Skill rồi demo cách tạo chúng trực tiếp trong dự án, mình gặp một câu hỏi rất thực tế từ một bạn học viên: *"Em thấy gõ lệnh chạy workflow hay để agent tự gọi skill thì kết quả cuối cùng nó cũng sinh code, cũng sửa file y chang nhau. Chẳng thấy khác gì, tại sao Google Antigravity phải tách ra hai khái niệm cho mất công vậy anh?"*
 
-Lúc đó mình cũng thoáng khựng lại vài giây. Để giải thích rành mạch và thuyết phục, mình đã về lục lại toàn bộ tài liệu chính thức của Google Antigravity lẫn các bài hướng dẫn trên Google Codelabs. Và câu trả lời bất ngờ nằm ở một thông báo quan trọng: **Workflows thực chất là định dạng cũ (legacy) đã bị phản đối (deprecated) và sẽ chính thức ngừng hoạt động vào ngày 1 tháng 11 năm 2026, nhường chỗ hoàn toàn cho tiêu chuẩn Agent Skills hiện đại hơn**.
+Lúc đó mình giải thích xong nhưng đêm về xem lại video record buổi học, tự nhiên thấy cách mình diễn đạt vẫn hơi lấn cấn và chưa thực sự gãy gọn. Thế là mình quyết định lên lục lại kỹ tài liệu chính thức của Google Antigravity và các bài thực hành trên Google Codelabs để "chữa cháy" một chút. Và câu trả lời bất ngờ nằm ở một thông báo quan trọng: **Workflows thực chất là định dạng cũ (legacy) đã bị phản đối (deprecated) và sẽ chính thức ngừng hoạt động vào ngày 1 tháng 11 năm 2026, nhường chỗ hoàn toàn cho tiêu chuẩn Agent Skills hiện đại hơn**.
 
-Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity và quy trình [Spec-Driven Development (SDD)](/spec-driven-development/), mình viết bài này để chia sẻ chi tiết bản chất của sự thay đổi này và lộ trình chuyển đổi tối ưu nhất cho bạn.
+Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity và quy trình [Spec-Driven Development (SDD)](/spec-driven-development/), mình viết bài này để làm rõ tường tận bản chất của sự thay đổi này và lộ trình chuyển đổi tối ưu nhất cho bạn.
 
 > **Tóm tắt cốt lõi (TL;DR):**
 > - **Thông báo quan trọng từ Google:** Theo tài liệu chính thức [Migration: Workflows to Skills](https://antigravity.google/docs/migration/workflows-to-skills), **Workflows** là định dạng cũ (chỉ gồm 1 tệp Markdown duy nhất), hiện đã bị **deprecated** và sẽ **ngừng hoạt động hoàn toàn từ ngày 01/11/2026**.

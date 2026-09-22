@@ -1,7 +1,7 @@
 ---
 title: "Workflow và Skill trong Antigravity khác nhau thế nào?"
 date: 2026-09-22
-description: "Phân biệt workflow và skill trong Antigravity: cơ chế kích hoạt, cấu trúc thư mục, tối ưu token và cách phối hợp cùng Rules để kiểm soát AI hiệu quả."
+description: "Phân biệt workflow và skill trong Antigravity: vì sao Workflows bị deprecated vào 01/11/2026, ưu thế của Skills và hướng dẫn chuyển đổi tối ưu token."
 slug: "workflow-va-skill-trong-antigravity"
 tags:
   - ai
@@ -15,201 +15,222 @@ Hiểu rõ sự khác biệt giữa **workflow và skill trong Antigravity** là
 
 Hôm trước ngồi cà phê với một bạn lập trình viên cấp dưới trong nhóm, bạn ấy hỏi mình một câu rất chân thật: *"Em thấy gõ lệnh chạy workflow hay để agent tự gọi skill thì kết quả cuối cùng nó cũng sinh code, cũng sửa file y chang nhau. Chẳng thấy khác gì, tại sao Google Antigravity phải tách ra hai khái niệm cho mất công vậy anh?"*
 
-Lúc đó mình cũng thoáng khựng lại vài giây. Để giải thích rành mạch và thuyết phục, mình đã về lục lại toàn bộ tài liệu chính thức của Google Antigravity lẫn các bài hướng dẫn trên Google Codelabs. Kết quả là các tài liệu đó giải thích khá trừu tượng, hoặc chỉ lướt qua định nghĩa kỹ thuật mà không nói rõ bản chất vận hành trong thực tế.
+Lúc đó mình cũng thoáng khựng lại vài giây. Để giải thích rành mạch và thuyết phục, mình đã về lục lại toàn bộ tài liệu chính thức của Google Antigravity lẫn các bài hướng dẫn trên Google Codelabs. Và câu trả lời bất ngờ nằm ở một thông báo quan trọng: **Workflows thực chất là định dạng cũ (legacy) đã bị phản đối (deprecated) và sẽ chính thức ngừng hoạt động vào ngày 1 tháng 11 năm 2026, nhường chỗ hoàn toàn cho tiêu chuẩn Agent Skills hiện đại hơn**.
 
-Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity và quy trình [Spec-Driven Development (SDD)](/spec-driven-development/), mình viết bài này để chia sẻ chi tiết góc nhìn và cách tổ chức khoa học nhất.
+Sẵn trải nghiệm làm việc thực chiến hàng ngày với Antigravity và quy trình [Spec-Driven Development (SDD)](/spec-driven-development/), mình viết bài này để chia sẻ chi tiết bản chất của sự thay đổi này và lộ trình chuyển đổi tối ưu nhất cho bạn.
 
 > **Tóm tắt cốt lõi (TL;DR):**
-> - **Cơ chế kích hoạt:** **Workflow** do con người chủ động gõ lệnh kích hoạt (Human-in-the-loop qua Slash Command `/ten-workflow`). **Skill** do Agent tự đánh giá ngữ cảnh và kích hoạt ngầm (Autonomous) nhờ cơ chế Progressive Disclosure.
-> - **Cấu trúc & Tài nguyên:** **Workflow** là một file markdown quy trình logic, khi cần làm agent vẫn phải sinh code từ đầu. **Skill** là một thư mục độc lập đóng gói sẵn script thực thi, tài liệu tham khảo và mẫu code — chạy trực tiếp với tham số động, giúp tiết kiệm token và tăng tốc đáng kể.
-> - **Công thức phối hợp:** Con người chạy **Workflow** để dẫn đường $\rightarrow$ Workflow chỉ định các **Skills** để Agent xử lý chuyên sâu $\rightarrow$ **Rules** đóng vai trò hàng rào bảo vệ (guardrails) giữ agent không đi chệch hướng.
+> - **Thông báo quan trọng từ Google:** Theo tài liệu chính thức [Migration: Workflows to Skills](https://antigravity.google/docs/migration/workflows-to-skills), **Workflows** là định dạng cũ (chỉ gồm 1 tệp Markdown duy nhất), hiện đã bị **deprecated** và sẽ **ngừng hoạt động hoàn toàn từ ngày 01/11/2026**.
+> - **Bản chất khác biệt:** Sở dĩ bạn thấy "kết quả giống nhau" vì Skills chính là phiên bản tiến hóa kế thừa Workflows. Tuy nhiên, **Skills (Agent Skills)** được tổ chức dưới dạng **thư mục hoàn chỉnh** (gồm `SKILL.md`, `scripts/`, `references/`), tuân theo chuẩn hệ sinh thái mở và tối ưu hóa việc nạp dữ liệu ngữ cảnh (Progressive Disclosure).
+> - **Cơ chế vận hành:** Workflows trước đây chủ yếu dựa vào việc con người gõ Slash Command. Trong khi đó, Skills cho phép Agent **tự động kích hoạt thông minh** dựa trên mô tả ngữ cảnh, đồng thời chạy thẳng các đoạn script có sẵn với tham số động thay vì bắt AI sinh lại code từ đầu.
 
 ---
 
 ## Mục lục bài viết
 
-1. [Bức tranh tổng thể: Ba trụ cột tùy biến trong Antigravity](#1-buc-tranh-tong-the-ba-tru-cot-tuy-bien-trong-antigravity)
-2. [Khác biệt 1: Cơ chế kích hoạt — Ai là người ra quyết định?](#2-khac-biet-1-co-che-kich-hoat--ai-la-nguoi-ra-quyet-dinh)
-3. [Khác biệt 2: Cấu trúc thư mục và kinh tế học Token](#3-khac-biet-2-cau-truc-thu-muc-va-kinh-te-hoc-token)
-4. [Bảng so sánh chi tiết: Workflow vs Skill](#4-bang-so-sanh-chi-tiet-workflow-vs-skill)
-5. [Tam giác phối hợp: Rules - Workflows - Skills](#5-tam-giac-phoi-hop-rules---workflows---skills)
-6. [Kịch bản thực chiến: Viết bài chuẩn SEO hoặc Triển khai hệ thống](#6-kich-ban-thuc-chien-viet-bai-chuan-seo-hoac-trien-khai-he-thong)
-7. [Những câu hỏi thường gặp (FAQ)](#7-nhung-cau-hoi-thuong-gap-faq)
-8. [Lời kết](#8-loi-ket)
+1. [Bức tranh tổng thể: Sự tiến hóa từ Workflows sang Skills](#1-buc-tranh-tong-the-su-tien-hoa-tu-workflows-sang-skills)
+2. [Thông báo quan trọng: Workflows chính thức bị khai tử vào 01/11/2026](#2-thong-bao-quan-trong-workflows-chinh-thuc-bi-khai-tu-vao-01112026)
+3. [Khác biệt 1: Cơ chế kích hoạt — Human-in-the-loop vs Autonomous Agent](#3-khac-biet-1-co-che-kich-hoat--human-in-the-loop-vs-autonomous-agent)
+4. [Khác biệt 2: Cấu trúc thư mục và kinh tế học Token](#4-khac-biet-2-cau-truc-thu-muc-va-kinh-te-hoc-token)
+5. [Bảng so sánh chi tiết: Legacy Workflows vs Agent Skills](#5-bang-so-sanh-chi-tiet-legacy-workflows-vs-agent-skills)
+6. [Mô hình phối hợp mới: Rules và Skills trong Antigravity](#6-mo-hinh-phoi-hop-moi-rules-va-skills-trong-antigravity)
+7. [Hướng dẫn chuyển đổi (Migration Guide): Từ Workflow cũ sang Skill](#7-huong-dan-chuyen-doi-migration-guide-tu-workflow-cu-sang-skill)
+8. [Những câu hỏi thường gặp (FAQ)](#8-nhung-cau-hoi-thuong-gap-faq)
+9. [Lời kết](#9-loi-ket)
 
 ---
 
-## 1. Bức tranh tổng thể: Ba trụ cột tùy biến trong Antigravity
+## 1. Bức tranh tổng thể: Sự tiến hóa từ Workflows sang Skills
 
-Để không bị rối, trước hết chúng ta cần nhìn lại toàn bộ hệ thống tùy biến (Customization System) của Google Antigravity. Trợ lý AI trong Antigravity không vận hành một cách mơ hồ, mà được định hình bởi 3 thành phần rõ ràng:
+Khi mới tiếp xúc với Google Antigravity, rất nhiều lập trình viên rơi vào cảm giác bối rối: *"Tại sao vừa có Rules, vừa có Workflows, lại vừa có Skills?"*. 
 
-1. **Rules (`GEMINI.md`, `AGENTS.md`, `.agents/rules/*.md`):** Các nguyên tắc bất di bất dịch, phong cách code, ràng buộc bảo mật. Rules luôn chạy nền hoặc tự nạp để đặt ra giới hạn "được làm gì và không được làm gì".
-2. **Workflows:** Quy trình tác vụ nhiều bước (SOP - Standard Operating Procedure) do con người chủ động chọn chạy khi cần thực hiện một đầu việc lớn.
-3. **Skills (`.agents/skills/<name>/`):** Bộ công cụ chuyên biệt đóng gói tri thức, mẫu thực thi và script tự động để Agent tự đem ra dùng khi đụng việc tương ứng.
+Thực tế, hệ thống tùy biến của Antigravity đã trải qua một giai đoạn chuyển giao kiến trúc:
+
+- **Giai đoạn đầu (Legacy Architecture):** Antigravity sử dụng các file `.md` đơn lẻ đặt trong `.agents/workflows/` (hoặc `.agent/workflows/`). Mỗi khi cần chạy một quy trình, lập trình viên gõ Slash Command `/ten-workflow`.
+- **Giai đoạn hiện tại (Modern Agentic Standard):** Nhận thấy hạn chế của các file markdown rời rạc, Google đã nâng cấp toàn bộ hệ thống sang **Agent Skills** đặt trong `.agents/skills/<name>/`. Đây không chỉ là một tài liệu hướng dẫn, mà là một gói công cụ độc lập (Modular Package).
 
 ```mermaid
-flowchart TD
-    A[Human Developer] -->|Gõ Slash Command| B(Workflow: Quy trình tổng quan)
-    B -->|Điều phối & gợi ý| C{Antigravity Agent}
-    D[Rules: GEMINI.md / AGENTS.md] -.->|Kiểm soát & Đặt rào chắn| C
-    C -->|Tự kích hoạt theo ngữ cảnh| E[Skill: Scripts & Templates]
-    E -->|Thực thi chính xác, ít tốn token| F[Mã nguồn / Hệ thống hoàn tất]
+flowchart LR
+    subgraph Legacy [Định dạng cũ - Sắp dừng hoạt động]
+        WF[1 File Markdown đơn lẻ<br/>.agents/workflows/*.md]
+    end
+
+    subgraph Modern [Tiêu chuẩn hiện đại - Agent Skills]
+        SK[Thư mục Modular Package<br/>.agents/skills/<name>/]
+        SK --> MD[SKILL.md: Hướng dẫn & Metadata]
+        SK --> SC[scripts/: Mã thực thi trực tiếp]
+        SK --> RF[references/: Tài liệu tra cứu mở rộng]
+    end
+
+    Legacy -->|Chính thức Deprecated<br/>Deadline: 01/11/2026| Modern
 ```
 
-Khi nhìn vào sơ đồ trên, bạn sẽ thấy ngay: Workflow và Skill không sinh ra để triệt tiêu lẫn nhau, mà nằm ở hai tầng điều phối hoàn toàn khác biệt.
+---
+
+## 2. Thông báo quan trọng: Workflows chính thức bị khai tử vào 01/11/2026
+
+Nếu bạn hoặc đội ngũ của bạn vẫn đang viết các file quy trình trong thư mục `workflows/`, đây là thông tin bạn cần lưu ý ngay lập tức:
+
+Theo tài liệu di trú chính thức của Google Antigravity ([Migration: Workflows to Skills](https://antigravity.google/docs/migration/workflows-to-skills)):
+- **Workflows là tính năng cũ (legacy format):** Chỉ bao gồm một tệp Markdown duy nhất.
+- **Trạng thái hiện tại:** Đã chính thức bị phản đối (**Deprecated**).
+- **Thời hạn chót (End of Life):** Tính năng Workflows sẽ **chính thức ngừng hoạt động vào ngày 1 tháng 11 năm 2026**.
+- **Giải pháp thay thế:** Toàn bộ quy trình phải được chuyển đổi sang tiêu chuẩn **Skills (Agent Skills)**.
+
+Lý do Google đưa ra quyết định này rất rõ ràng: Việc ép toàn bộ logic, code mẫu và quy trình vào một tệp Markdown duy nhất khiến ngữ cảnh (context) bị phình to, agent khó kiểm soát các tác vụ phức tạp và không thể tận dụng lại các script tự động hóa có sẵn.
 
 ---
 
-## 2. Khác biệt 1: Cơ chế kích hoạt — Ai là người ra quyết định?
+## 3. Khác biệt 1: Cơ chế kích hoạt — Human-in-the-loop vs Autonomous Agent
 
-Điểm khác biệt căn bản nhất và dễ nhận thấy nhất nằm ở **chủ thể kích hoạt (Trigger Subject)**:
+Sự khác biệt rõ nét nhất trong trải nghiệm hàng ngày nằm ở việc **ai là người bấm nút khởi động**:
 
-### Workflow: Con người chủ động kích hoạt (Human-driven)
+### Workflows: Kích hoạt thủ công bởi con người (Human-driven)
+- **Cơ chế:** Hoạt động hoàn toàn theo lệnh của con người thông qua Slash Command (ví dụ `/create-blog`, `/deploy-prod`).
+- **Hạn chế:** Agent không thể tự nhận biết khi nào nên dùng workflow nếu người dùng không gõ lệnh. Bạn phải nhớ tên từng workflow và tự quyết định lúc nào nên gọi nó.
 
-Workflow phục vụ mô hình **Human-in-the-loop**. Khi bạn bắt đầu một phiên làm việc có chủ đích rõ ràng, bạn là người bấm nút:
-
-- Bạn gõ lệnh Slash Command trong khung chat, ví dụ `/seo-content-writer`, `/code-review`, `/release-version`.
-- Ngay lập tức, agent nạp kịch bản làm việc tương ứng và bắt đầu đối thoại hoặc hướng dẫn bạn qua từng bước của quy trình đó.
-- Nếu không có sự chủ động gọi lệnh từ con người, Workflow sẽ nằm yên và không bao giờ tự ý can thiệp vào công việc của bạn.
-
-### Skill: Agent tự giác kích hoạt (Autonomous Agent-driven)
-
-Ngược lại hoàn toàn với Workflow, Skill được thiết kế để Agent **tự nhận diện và tự rút đồ nghề ra dùng**:
-
-- Trong Antigravity, mỗi skill được đăng ký với một `name` và một đoạn `description` súc tích trong phần frontmatter của file `SKILL.md`.
-- Antigravity áp dụng cơ chế **Progressive Disclosure** (Tiết lộ tăng tiến): Khi khởi động phiên chat, hệ thống không nhồi toàn bộ nội dung của hàng chục skill vào bộ nhớ context window. Nó chỉ đưa danh sách tên và mô tả ngắn gọn của các skill.
-- Khi bạn giao một yêu cầu bất kỳ (hoặc khi agent nhận được kết quả từ một bước trước đó), agent sẽ tự rà soát mô tả: *"Nhiệm vụ này có khớp với chuyên môn của skill nào không?"*. Nếu thấy khớp từ khóa hoặc ngữ cảnh, agent sẽ tự nạp đầy đủ nội dung của `SKILL.md` và thực thi.
-- Bạn không cần phải nhớ cú pháp gọi skill; Agent tự biết khi nào cần dùng búa, khi nào cần dùng cờ-lê.
+### Skills: Tự động nhận diện ngữ cảnh (Autonomous Progressive Disclosure)
+- **Cơ chế:** Mỗi skill sở hữu một trường `description` trong YAML frontmatter của file `SKILL.md`. 
+- **Tối ưu ngữ cảnh:** Khi khởi động, Antigravity **chỉ nạp danh sách tên và mô tả ngắn gọn** của các skills vào bộ nhớ (Progressive Disclosure). Cửa sổ ngữ cảnh (Context Window) không hề bị chiếm dụng lãng phí.
+- **Kích hoạt tự động:** Trong quá trình thực thi, khi bạn đưa ra yêu cầu (hoặc khi agent nhận diện được dữ liệu từ task trước đó), agent sẽ tự quét mô tả: *"Nhiệm vụ này khớp với kỹ năng nào?"*. Nếu khớp, agent sẽ **tự động nạp chi tiết file SKILL.md** để xử lý.
+- Dĩ nhiên, nếu muốn, bạn vẫn có thể chủ động gọi skill bằng cách `@ten-skill` hoặc dùng Slash Command tương ứng nếu skill đó được cấu hình hỗ trợ.
 
 ---
 
-## 3. Khác biệt 2: Cấu trúc thư mục và kinh tế học Token
+## 4. Khác biệt 2: Cấu trúc thư mục và kinh tế học Token
 
-Nhiều người thắc mắc: *"Tại sao phải tạo cả thư mục skill cồng kềnh, trong khi workflow chỉ cần 1 file Markdown là xong?"*
+Đây chính là điểm "ăn tiền" nhất giải thích tại sao Skills vượt trội hoàn toàn so với một file Markdown Workflow truyền thống.
 
-Câu trả lời nằm ở bài toán **tối ưu hóa token** và **tính tất định (deterministic) của mã nguồn**.
+### Điểm nghẽn của 1 file Workflow cũ
+Khi bạn đưa cho AI một file Markdown mô tả: *"Bước 2: Hãy nén toàn bộ ảnh trong thư mục sang định dạng WebP"*. 
 
-### Workflow: Một file hướng dẫn logic thuần túy
+Do workflow chỉ là văn bản hướng dẫn, Agent sẽ phải:
+1. Đọc hướng dẫn và suy nghĩ xem nên viết script Python hay Bash để nén ảnh.
+2. Tiêu tốn vài trăm token để sinh ra file script tạm.
+3. Chạy script tạm đó (và có nguy cơ script bị lỗi do AI hallucination).
+4. Xóa script tạm sau khi xong.
 
-File workflow thường chỉ là một tài liệu Markdown (.md) mô tả quy trình dạng văn bản: bước 1 làm gì, bước 2 kiểm tra gì, bước 3 xuất báo cáo ra sao.
+Toàn bộ quy trình này vừa chậm, vừa ngốn token vô ích, vừa thiếu tính ổn định.
 
-Hạn chế lớn nhất khi chỉ dựa vào file văn bản là: **Agent vẫn phải tự biên tự diễn phần thực thi**. Nếu bước 2 yêu cầu nén ảnh hoặc kiểm tra định dạng dữ liệu, LLM sẽ phải tự nghĩ ra một đoạn script Python/Bash tạm thời, viết ra đĩa rồi chạy. Việc này vừa ngốn nhiều token sinh mã, vừa tiềm ẩn nguy cơ lỗi (ảo giác - hallucination) do mỗi lần agent viết script một kiểu.
-
-### Skill: Gói công cụ thực thi hoàn chỉnh (Modular Execution Package)
-
-Skill trong Antigravity không bao giờ chỉ là một file `.md` đơn độc. Nó là một thư mục có cấu trúc chuẩn mực:
+### Sức mạnh của thư mục Agent Skill
+Skills được chuẩn hóa thành một gói tài nguyên độc lập:
 
 ```text
-.agents/skills/my-specialized-skill/
-├── SKILL.md          # Bắt buộc: Hướng dẫn cốt lõi kèm YAML frontmatter
-├── scripts/          # Tùy chọn: Shell script, Python script có thể chạy trực tiếp
-├── examples/         # Tùy chọn: Code mẫu, payload mẫu đạt chuẩn
-├── resources/        # Tùy chọn: File cấu hình, templates cố định
-└── references/       # Tùy chọn: Tài liệu chuyên sâu (chỉ đọc khi thực sự cần)
+.agents/skills/image-optimizer/
+├── SKILL.md          # Hướng dẫn quy trình & điều kiện kích hoạt
+├── scripts/          # Mã thực thi viết sẵn (Bash, Python, Node.js)
+│   └── compress.py   # Script nén ảnh tối ưu sẵn
+├── references/       # Tài liệu cấu hình chi tiết (chỉ đọc khi cần)
+└── examples/         # Mẫu input/output chuẩn
 ```
 
-Sức mạnh của cấu trúc này nằm ở:
-
-1. **Có sẵn mã thực thi (`scripts/`):** Thay vì yêu cầu LLM viết 50 dòng code phân tích JSON, bạn viết sẵn một script `analyze.py` trong thư mục `scripts/`. Agent chỉ việc gọi lệnh `python scripts/analyze.py --input data.json` với tham số động. 
-2. **Tiết kiệm token vượt trội:** LLM chỉ tốn vài chục token để truyền tham số, thay vì tiêu tốn hàng nghìn token để viết đi viết lại đoạn mã xử lý.
-3. **Tốc độ và độ tin cậy tuyệt đối:** Script viết sẵn chạy ngay lập tức, không có độ trễ sinh mã và kết quả luôn đồng nhất 100% qua mọi lần chạy.
-4. **Tách rời tài liệu nặng (`references/`):** Những bảng đặc tả API hàng nghìn dòng được để riêng trong thư mục `references/`. Khi nào agent gặp trường hợp cá biệt, nó mới đọc file đó, giữ cho cửa sổ ngữ cảnh (Context Window) luôn thông thoáng.
+Nhờ cấu trúc này:
+- **Chạy trực tiếp mã có sẵn:** Agent không cần tự sáng chế code mới. Nó chỉ cần chạy lệnh `python scripts/compress.py --quality 80` với tham số động.
+- **Tiết kiệm token tối đa:** Thay vì sinh 50-100 dòng code script, agent chỉ tốn đúng một dòng lệnh CLI.
+- **Tính tất định 100%:** Code viết sẵn trong thư mục `scripts/` đã được kiểm thử kỹ lưỡng, đảm bảo chạy lần nào cũng đúng, không sợ AI "ngáo" giữa chừng.
 
 ---
 
-## 4. Bảng so sánh chi tiết: Workflow vs Skill
+## 5. Bảng so sánh chi tiết: Legacy Workflows vs Agent Skills
 
-Dưới đây là bảng tổng hợp các điểm khác nhau cốt lõi giúp bạn dễ dàng tra cứu:
-
-| Tiêu chí so sánh | Workflow (Quy trình) | Skill (Kỹ năng đóng gói) |
+| Tiêu chí so sánh | Workflows (Định dạng cũ) | Agent Skills (Tiêu chuẩn mới) |
 | :--- | :--- | :--- |
-| **Bản chất** | Kịch bản điều phối công việc từng bước (SOP) | Hộp đồ nghề tri thức & công cụ chuyên biệt |
-| **Đối tượng kích hoạt** | Con người gõ lệnh chủ động (`/ten-workflow`) | Agent tự kích hoạt dựa trên ngữ cảnh hoặc mô tả |
-| **Cấu trúc lưu trữ** | 1 file Markdown (`.agents/workflows/*.md`) | Thư mục gồm `SKILL.md` + `scripts/` + `references/` |
-| **Cơ chế nạp bộ nhớ** | Nạp toàn bộ kịch bản ngay khi người dùng gõ lệnh | **Progressive Disclosure** (chỉ nạp tên/mô tả trước, nạp chi tiết khi cần) |
-| **Khả năng thực thi** | Agent phải tự suy luận và tự sinh code mới | Tận dụng trực tiếp các script và template có sẵn |
-| **Tối ưu Token** | Tốn nhiều token hơn do agent phải tự sinh mã trung gian | Tiết kiệm token tối đa, giảm thiểu chi phí và thời gian |
-| **Mục đích sử dụng** | Định hướng *dòng chảy công việc* (Workflow orchestration) | Cung cấp *năng lực giải quyết bài toán cụ thể* (Domain capabilities) |
+| **Trạng thái hỗ trợ** | **Deprecated** (Ngừng hoạt động 01/11/2026) | **Active & Recommended** (Tiêu chuẩn dài hạn) |
+| **Cấu trúc lưu trữ** | 1 file Markdown đơn lẻ (`workflows/*.md`) | Thư mục trọn gói (`SKILL.md`, `scripts/`, `references/`) |
+| **Cơ chế kích hoạt** | Con người gõ Slash Command thủ công | Agent tự động nhận diện theo ngữ cảnh hoặc con người gọi |
+| **Quản lý Context Window** | Dễ gây tràn bộ nhớ nếu file dài | **Progressive Disclosure** (chỉ tải sâu khi cần) |
+| **Khả năng chạy mã** | Phải yêu cầu AI tự sinh script tạm thời | Tích hợp sẵn executable scripts chạy với tham số động |
+| **Tiêu hao Token** | Cao (do phải sinh code lặp đi lặp lại) | Rất thấp (chỉ truyền tham số vào script có sẵn) |
+| **Chuẩn hệ sinh thái** | Nội bộ, đóng kín | Hệ sinh thái mở, dễ chia sẻ giữa các AI IDE |
 
 ---
 
-## 5. Tam giác phối hợp: Rules - Workflows - Skills
+## 6. Mô hình phối hợp mới: Rules và Skills trong Antigravity
 
-Trong các dự án thực tế, câu hỏi đúng không phải là *"Nên dùng Workflow hay dùng Skill?"*, mà là **"Phối hợp bộ ba này như thế nào để hệ thống chạy êm nhất?"**.
-
-Kinh nghiệm của mình là áp dụng mô hình **Tam giác vàng điều phối**:
+Sau khi Workflows bị loại bỏ, kiến trúc tùy biến trong Antigravity sẽ trở nên tinh gọn và mạch lạc hơn rất nhiều với mô hình **Rules + Skills**:
 
 ```text
-         [ 1. WORKFLOW ]
-     (Human triggers the flow)
-             /       \
-            /         \
-           v           v
-   [ 2. RULES ] <----> [ 3. SKILLS ]
-(Guardrails keep     (Pre-built tools
- agent on track)      execute tasks)
+     ┌────────────────────────────────────────────────────────┐
+     │                  RULES (GEMINI.md)                     │
+     │      - Ranh giới bảo mật & phong cách code             │
+     │      - Luôn chạy nền để giữ Agent "đúng đường ray"     │
+     └──────────────────────────┬─────────────────────────────┘
+                                │ Giám sát & Đặt rào chắn
+                                v
+     ┌────────────────────────────────────────────────────────┐
+     │              AGENT SKILLS (skills/<name>/)             │
+     │      - Đóng gói tri thức chuyên môn từng domain        │
+     │      - Kèm mã thực thi (scripts/) và tài liệu sâu      │
+     │      - Tự kích hoạt đúng lúc, tiết kiệm tối đa token   │
+     └────────────────────────────────────────────────────────┘
 ```
 
-1. **Tầng 1 - Workflow dẫn dắt:** Khi bạn bắt đầu một công việc lớn, hãy gõ một Slash Command. Workflow vạch ra bức tranh tổng quát: bước nào làm trước, bước nào làm sau, yêu cầu đầu ra của từng giai đoạn là gì.
-2. **Tầng 2 - Workflow gợi ý Skill:** Trong nội dung workflow, bạn khéo léo mô tả các yêu cầu kỹ thuật để kích hoạt đúng các skill chuyên biệt mà bạn đã cài sẵn trong dự án.
-3. **Tầng 3 - Rules giữ kỷ luật:** Toàn bộ quá trình agent đọc workflow và gọi skill đều phải tuân thủ nghiêm ngặt các điều luật trong `GEMINI.md` hoặc `AGENTS.md`. Rules là chiếc phanh an toàn ngăn agent xóa nhầm dữ liệu, vi phạm chuẩn đặt tên hoặc đi lệch phạm vi yêu cầu.
+1. **Rules (`GEMINI.md`, `AGENTS.md`):** Đóng vai trò là "hiến pháp" và rào chắn an toàn (guardrails). Rules quy định những điều cấm kỵ (do & don't), quy ước đặt tên, văn phong giao tiếp và chuẩn kiến trúc.
+2. **Skills (`.agents/skills/`):** Đóng vai trò là "hộp đồ nghề vạn năng". Mỗi khi agent đối mặt với một bài toán cụ thể (audit SEO, refactor component, kiểm tra accessibility), nó tự động rút đúng skill tương ứng ra để xử lý trong phạm vi cho phép của Rules.
 
-Nhờ cách phân tầng này, việc quản lý [Second Brain với LLM](/xay-dung-second-brain-voi-llm/) hay tự động hóa lập trình hàng ngày trở nên ngăn nắp và cực kỳ tin cậy.
+Sự kết hợp này giúp hệ thống của bạn vừa tuân thủ kỷ luật nghiêm ngặt, vừa có sức mạnh giải quyết vấn đề linh hoạt và tối ưu chi phí.
 
 ---
 
-## 6. Kịch bản thực chiến: Viết bài chuẩn SEO hoặc Triển khai hệ thống
+## 7. Hướng dẫn chuyển đổi (Migration Guide): Từ Workflow cũ sang Skill
 
-Hãy lấy một ví dụ rất gần gũi: Bạn muốn xây dựng một quy trình viết bài blog kỹ thuật chuẩn SEO trên blog cá nhân.
+Nếu dự án của bạn vẫn còn các file trong `.agents/workflows/`, hãy làm theo 4 bước sau để hoàn tất việc di trú trước ngày 01/11/2026:
 
-Thay vì ngồi gõ một prompt dài ngoằng mỗi lần viết bài, bạn cấu hình hệ thống như sau:
-
-### Bước 1: Thiết lập Rules (`GEMINI.md`)
-Bạn đặt ra các giới hạn vĩnh viễn:
-- Tiêu đề SEO tối đa 60 ký tự, từ khóa chính ở đầu.
-- Meta Description tối đa 160 ký tự.
-- Luôn giao tiếp bằng tiếng Việt, xưng "mình" và gọi người đọc là "bạn".
-
-### Bước 2: Tạo Skill SEO (`.agents/skills/seo-content-writer/`)
-Trong thư mục skill này, bạn cung cấp:
-- `SKILL.md`: Các tiêu chuẩn chất lượng (CORE-EEAT), công thức giật tít, checklist 9 bước viết bài.
-- `scripts/verify-links.sh`: Script kiểm tra tự động xem các internal links trong bài có bị 404 hay không.
-
-### Bước 3: Tạo Workflow Xuất Bản (`/publish-blog`)
-Khi bạn muốn viết bài mới, bạn chỉ cần gõ:
+### Bước 1: Tạo thư mục Skill tương ứng
+Với mỗi workflow cũ (ví dụ `seo-checker.md`), tạo một thư mục mới:
 ```bash
-/publish-blog "Workflow và Skill trong Antigravity"
+mkdir -p .agents/skills/seo-checker/scripts
 ```
 
-**Dòng chảy vận hành bên dưới sẽ diễn ra:**
-1. Workflow khởi chạy, yêu cầu bạn nhập dàn ý sơ bộ hoặc các ý tưởng cốt lõi.
-2. Agent đọc yêu cầu, nhận thấy cần tối ưu hóa bài viết nên **tự động kích hoạt skill `seo-content-writer`**.
-3. Agent áp dụng toàn bộ kỹ năng viết chuẩn SEO từ skill, đồng thời chạy script kiểm tra đường dẫn trong thư mục `scripts/`.
-4. Trong suốt quá trình đó, **Rules** giám sát để đảm bảo tiêu đề không vượt quá 60 ký tự và văn phong giữ đúng phong cách cá nhân của bạn.
+### Bước 2: Chuyển nội dung sang `SKILL.md` và viết Frontmatter chuẩn
+Tạo file `SKILL.md` bên trong thư mục vừa tạo. Phần quan trọng nhất là bổ sung YAML frontmatter:
 
-Mọi thứ vận hành nhịp nhàng như một dây chuyền sản xuất tự động mà bạn không cần phải nhắc đi nhắc lại từng quy tắc nhỏ.
+```markdown
+---
+name: seo-checker
+description: >-
+  Use this skill when auditing on-page SEO, verifying meta tags, 
+  heading structures, or checking internal link integrity.
+---
+
+# SEO Checker Guide
+<!-- Đưa nội dung quy trình cũ từ workflow vào đây -->
+```
+
+> **Mẹo:** Trường `description` phải viết bằng ngôi thứ ba, chỉ rõ **khi nào** agent nên kích hoạt kỹ năng này.
+
+### Bước 3: Bóc tách mã script (nếu có)
+Nếu trong workflow cũ có những đoạn code Python, Bash hay Node.js mà agent thường xuyên phải chạy, hãy lưu chúng thành các file độc lập trong thư mục `scripts/`:
+- `scripts/check-broken-links.py`
+- `scripts/audit-headings.sh`
+
+Trong `SKILL.md`, chỉ cần hướng dẫn agent gọi file script kèm tham số đầu vào.
+
+### Bước 4: Xóa bỏ workflow cũ
+Sau khi kiểm tra skill mới hoạt động ổn định, bạn có thể xóa file markdown cũ trong thư mục `workflows/` để tránh xung đột định danh.
 
 ---
 
-## 7. Những câu hỏi thường gặp (FAQ)
+## 8. Những câu hỏi thường gặp (FAQ)
 
-### Tôi có thể tự gõ lệnh kích hoạt một Skill giống như Workflow không?
-Có. Trong Antigravity, bạn hoàn toàn có thể dùng cú pháp `@` để nhắc đến tên skill (ví dụ `@seo-content-writer`) nhằm ép buộc agent sử dụng skill đó ngay từ đầu. Tuy nhiên, bản chất thiết kế của skill vẫn ưu tiên cơ chế tự kích hoạt theo ngữ cảnh.
+### Sau ngày 01/11/2026, các Slash Command có bị mất không?
+Không. Các Slash Command vẫn tồn tại, nhưng cơ chế nền bên dưới sẽ liên kết trực tiếp tới các Skill tương ứng thay vì đọc từ file workflow legacy.
 
-### Dự án của tôi nhỏ, tôi nên viết Workflow hay Skill trước?
-Nếu bạn mới bắt đầu, hãy viết **Rules** trước để thiết lập phong cách làm việc. Tiếp theo, nếu bạn có một quy trình lặp đi lặp lại do bạn kiểm soát (như kiểm thử và tạo bản build), hãy tạo một **Workflow**. Khi nhận thấy trong workflow có những đoạn code/script phải tái sử dụng nhiều lần và muốn tiết kiệm token, đó là lúc thích hợp nhất để bạn đóng gói thành **Skill**.
+### Nếu tôi chỉ cần một hướng dẫn đơn giản không có script, có bắt buộc phải tạo folder Skill không?
+Có. Theo tiêu chuẩn mới của Antigravity, mọi kỹ năng đều phải nằm trong thư mục `skills/<name>/SKILL.md`. Dù bạn không dùng thư mục `scripts/` hay `references/`, cấu trúc này vẫn bắt buộc để hệ thống quản lý siêu dữ liệu (metadata) và hỗ trợ cơ chế Progressive Disclosure.
 
-### Điều quan trọng nhất khi viết một file `SKILL.md` là gì?
-Đó chính là trường `description` trong phần frontmatter. Agent dựa vào mô tả này để quyết định có kích hoạt skill hay không. Một phần mô tả rõ ràng: *"Dùng skill này khi người dùng yêu cầu X, hoặc khi cần xử lý bài toán Y"* sẽ giúp agent gọi đúng đồ nghề, tránh tình trạng kích hoạt nhầm hoặc bỏ quên kỹ năng.
+### Làm sao để biết Agent có đang kích hoạt đúng Skill không?
+Trong Antigravity IDE, khi một skill được kích hoạt, thanh trạng thái hoặc lịch sử suy luận của agent sẽ hiển thị thông báo tải skill tương ứng. Bạn cũng có thể chủ động gõ `@ten-skill` vào prompt nếu muốn ép buộc agent dùng ngay kỹ năng đó.
 
 ---
 
-## 8. Lời kết
+## 9. Lời kết
 
-Việc phân tách giữa **Workflow** và **Skill** trong Antigravity thoạt nhìn có vẻ rườm rà, nhưng thực chất là một bước tiến quan trọng trong tư duy công nghệ: chuyển từ việc "chat với AI qua từng prompt đơn lẻ" sang "thiết kế kiến trúc hệ thống cộng tác với AI".
+Việc Google Antigravity chính thức loại bỏ **Workflows** để chuyển dịch hoàn toàn sang **Agent Skills** trước ngày 01/11/2026 không phải là sự "vẽ chuyện rườm rà", mà là một bước chuyển mình tất yếu của kỹ thuật công nghệ đại lý AI (Agentic Engineering).
 
-- **Workflow** trao cho bạn quyền kiểm soát dòng chảy công việc.
-- **Skill** trang bị cho Agent công cụ chuyên môn sắc bén và tiết kiệm tài nguyên.
-- **Rules** đảm bảo mọi thứ luôn vận hành trong tầm kiểm soát.
+Chuyển đổi từ các file Markdown rời rạc sang các module kỹ năng có thể thực thi giúp chúng ta:
+- Kiểm soát ngữ cảnh thông minh hơn (không lo tràn Context Window).
+- Tiết kiệm token và chi phí API một cách rõ rệt.
+- Xây dựng kho công cụ tái sử dụng bền vững, chuẩn hóa theo hệ sinh thái mở.
 
-Khi bạn kết hợp hài hòa cả ba yếu tố này, trợ lý AI sẽ thực sự trở thành một người cộng sự ăn ý, giải phóng bạn khỏi những thao tác thủ công lặp lại để tập trung vào những bài toán kỹ thuật giá trị hơn.
+Nếu bạn đang xây dựng [Second Brain với LLM](/xay-dung-second-brain-voi-llm/) hoặc quản lý các dự án phức tạp với Antigravity, hãy bắt tay vào việc chuẩn hóa các kỹ năng của bạn sang Agent Skills ngay hôm nay!
